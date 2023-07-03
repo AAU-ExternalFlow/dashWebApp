@@ -1,5 +1,6 @@
 import os
 import datetime
+import base64
 # import sys
 from dash import Dash, html, dcc, dash_table
 from dash.dependencies import Input, Output, State
