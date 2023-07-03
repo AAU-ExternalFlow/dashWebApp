@@ -1,329 +1,107 @@
-import plotly.express as px
-import plotly.graph_objects as go
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
-import dash_bootstrap_components as dbc
+import os
+import datetime
+# import sys
+from dash import Dash, html, dcc, dash_table
 from dash.dependencies import Input, Output, State
-import aerosandbox as asb
-import aerosandbox.numpy as np
-import copy
-import plotly.figure_factory as ff
+import plotly.express as pu
 import pandas as pd
+# import dash_uploader as du
+import logging  # Add this line
 
-from app_components import *
 
-### Build the app
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.MINTY], title="Airfoil Analysis")
+UPLOAD_DIRECTORY = "/app/uploads"
+
+debug = False if os.environ["DASH_DEBUG_MODE"] == "False" else True
+
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+app = Dash(__name__)
+
+
 server = app.server
 
-app.layout = dbc.Container(
-    [
-        dbc.Row([
-            dbc.Col([
-                dcc.Markdown("""
-                # Airfoil Analysis with [AeroSandbox](https://github.com/peterdsharpe/AeroSandbox) and [Dash](https://plotly.com/dash/)
-                
-                By [Peter Sharpe](https://peterdsharpe.github.io/). Uses potential flow theory (viscous effects neglected, for now). [Source code here](https://github.com/peterdsharpe/Automotive-Airfoil-Design).
-                """)
-            ], width=True),
-            dbc.Col([
-                html.Img(src="assets/MIT-logo-red-gray-72x38.svg", alt="MIT Logo", height="30px"),
-            ], width=1)
-        ], align="end"),
+app.layout = html.Div([
+    html.Div(children=[
+        dcc.Upload(
+            id='upload-image',
+            children=html.Div([
+                'Drag and Drop or ',
+                html.A('Select Files')
+            ]),
+            style={
+                'width': '100%',
+                'height': '60px',
+                'lineHeight': '60px',
+                'borderWidth': '1px',
+                'borderStyle': 'dashed',
+                'borderRadius': '5px',
+                'textAlign': 'center',
+                'margin': '10px'
+            },
+            # Allow multiple files to be uploaded
+            multiple=False
+        ),
+        html.Div(id='output-image-upload'),
+    ], style={'width': '49%', 'padding': 10, 'flex': 1}),
+
+    html.Div(children=[
+        html.Button('Analyze Image', id='analyze-button', n_clicks=0),
+        html.Div(id='output-image')
+    ], style={'width': '49%', 'padding': 10, 'flex': 1})
+], style={'display': 'flex', 'flex-direction': 'row'})
+
+def parse_contents(contents, filename, date):
+    return html.Div([
+        html.H5(filename),
+        html.H6(datetime.datetime.fromtimestamp(date)),
+
+        # HTML images accept base64 encoded strings in the same format
+        # that is supplied by the upload
+        html.Img(src=contents, style={'width': '100%'}),
         html.Hr(),
-        dbc.Row([
-            dbc.Col([
-                dbc.Button(
-                    "Modify Operating Conditions",
-                    id="operating_button"
-                ),
-                dbc.Collapse(
-                    dbc.Card(
-                        dbc.CardBody(
-                            operating_slider_components,
-                        )
-                    ),
-                    id="operating_collapse",
-                    is_open=False
-                ),
-                html.Hr(),
-                dbc.Button(
-                    "Modify Shape Parameters (Kulfan)",
-                    id="shape_button"
-                ),
-                dbc.Collapse(
-                    dbc.Card(
-                        dbc.CardBody(
-                            kulfan_slider_components,
-                        )
-                    ),
-                    id="shape_collapse",
-                    is_open=False
-                ),
-                html.Hr(),
-                dbc.Button(
-                    "Show Raw Coordinates (*.dat format)",
-                    id="coordinates_button"
-                ),
-                dbc.Collapse(
-                    dbc.Card(
-                        dbc.CardBody(
-                            dcc.Markdown(id="coordinates_output")
-                        )
-                    ),
-                    id="coordinates_collapse",
-                    is_open=False
-                ),
-                html.Hr(),
-                dcc.Markdown("##### Commands"),
-                dbc.Button(
-                    "Analyze",
-                    id="analyze", color="primary", style={"margin": "5px"}),
-                html.Hr(),
-                dcc.Markdown("##### Aerodynamic Performance"),
-                dbc.Spinner(
-                    html.P(id='text_output'),
-                    color="primary",
-                )
+        html.Div('Raw Content'),
+        html.Pre(contents[0:200] + '...', style={
+            'whiteSpace': 'pre-wrap',
+            'wordBreak': 'break-all'
+        })
+    ])
 
-            ], width=3),
-            dbc.Col([
-                dcc.Graph(id='display', style={'height': '90vh'}),
-            ], width=9, align="start")
-        ]),
-        html.Hr(),
-        dcc.Markdown("""
-        Aircraft design tools powered by [AeroSandbox](https://github.com/peterdsharpe/AeroSandbox). Build beautiful UIs for your scientific computing apps with [Plot.ly](https://plotly.com/) and [Dash](https://plotly.com/dash/)!
-        """),
-    ],
-    fluid=True
-)
-
-
-### Callback to make shape parameters menu expand
-@app.callback(
-    Output("shape_collapse", "is_open"),
-    [Input("shape_button", "n_clicks")],
-    [State("shape_collapse", "is_open")]
-)
-def toggle_shape_collapse(n_clicks, is_open):
-    if n_clicks:
-        return not is_open
-    return is_open
-
-
-### Callback to make operating parameters menu expand
-@app.callback(
-    Output("operating_collapse", "is_open"),
-    [Input("operating_button", "n_clicks")],
-    [State("operating_collapse", "is_open")]
-)
-def toggle_shape_collapse(n_clicks, is_open):
-    if n_clicks:
-        return not is_open
-    return is_open
-
-
-### Callback to make coordinates menu expand
-@app.callback(
-    Output("coordinates_collapse", "is_open"),
-    [Input("coordinates_button", "n_clicks")],
-    [State("coordinates_collapse", "is_open")]
-)
-def toggle_shape_collapse(n_clicks, is_open):
-    if n_clicks:
-        return not is_open
-    return is_open
-
-
-### Callback to make operating sliders display proper values
-@app.callback(
-    Output("alpha_slider_output", "children"),
-    [Input("alpha_slider_input", "drag_value")]
-)
-def display_alpha_slider(drag_value):
-    return f"Angle of Attack: {drag_value}"
+@app.callback(Output('output-image-upload', 'children'),
+              Input('upload-image', 'contents'),
+              State('upload-image', 'filename'),
+              State('upload-image', 'last_modified'))
+def update_output(contents, filename, date):
+    if contents is not None:
+        children = [
+            parse_contents(contents, filename, date)
+        ]
+        return children
 
 
 @app.callback(
-    Output("height_slider_output", "children"),
-    [Input("height_slider_input", "drag_value")]
+    Output('output-image', 'children'),
+    Input('analyze-button', 'n_clicks'),
+    State('upload-image', 'contents'),
+    prevent_initial_call=True
 )
-def display_alpha_slider(drag_value):
-    return f"Height: {drag_value}"
+def analyze_image(n_clicks, contents):
+    if contents is not None:
+        #Decode the contents of the uploaded file
+        _, content_string = contents.split(',')
+        decoded = base64.b64decode(content_string)
+
+        #Save the image to a file within the container's file system
+        unique_filename = str(uuid.uuid4()) + '.jpg'
+        image_path = os.path.join(UPLOAD_DIRECTORY, unique_filename)
+        with open(image_path, 'wb') as f:
+            f.write(decoded)
+
+        print('Analysis on uploaded image:', image_path)
+
+        #Return the image in the output div
+        return html.Img(src=contents, style={'width': '100%'})
 
 
-@app.callback(
-    Output("streamline_density_slider_output", "children"),
-    [Input("streamline_density_slider_input", "drag_value")]
-)
-def display_streamline_density_slider(drag_value):
-    return f"Streamline Density: {drag_value}"
 
-
-### The callback to make the kulfan sliders display proper values
-for side in sides:
-    for i in range(n_kulfan_inputs_per_side):
-        @app.callback(
-            Output(f"kulfan_{side.lower()}_{i}_output", "children"),
-            [Input(f"kulfan_{side.lower()}_{i}_input", "drag_value")]
-        )
-        def display_slider_value(drag_value):
-            return f"Parameter: {drag_value}"
-
-
-def make_table(dataframe):
-    return dbc.Table.from_dataframe(
-        dataframe,
-        bordered=True,
-        hover=True,
-        responsive=True,
-        striped=True,
-        style={
-
-        }
-    )
-
-
-last_analyze_timestamp = None
-
-n_clicks_last = 0
-
-### The callback to draw the airfoil on the graph
-@app.callback(
-    Output("display", "figure"),
-    Output("text_output", "children"),
-    Output("coordinates_output", "children"),
-    [
-        Input('analyze', 'n_clicks'),
-        Input('alpha_slider_input', "value"),
-        Input("height_slider_input", "value"),
-        Input("streamline_density_slider_input", "value"),
-        Input("operating_checklist", "value"),
-    ] + [
-        Input(f"kulfan_{side.lower()}_{i}_input", "value")
-        for side in sides
-        for i in range(n_kulfan_inputs_per_side)
-    ]
-)
-def display_graph(n_clicks, alpha, height, streamline_density, operating_checklist, *kulfan_inputs):
-    ### Figure out if a button was pressed
-    global n_clicks_last
-    if n_clicks is None:
-        n_clicks = 0
-
-    analyze_button_pressed = n_clicks > n_clicks_last
-    n_clicks_last = n_clicks
-
-    ### Parse the checklist
-    ground_effect = 'ground_effect' in operating_checklist
-
-    ### Start constructing the figure
-    airfoil = asb.Airfoil(
-        coordinates=asb.get_kulfan_coordinates(
-            lower_weights=np.array(kulfan_inputs[n_kulfan_inputs_per_side:]),
-            upper_weights=np.array(kulfan_inputs[:n_kulfan_inputs_per_side]),
-            TE_thickness=0,
-            enforce_continuous_LE_radius=False,
-            n_points_per_side=200
-        )
-    )
-
-    ### Do coordinates output
-    coordinates_output = "\n".join(
-        ["```"] +
-        ["AeroSandbox Airfoil"] +
-        ["\t%f\t%f" % tuple(coordinate) for coordinate in airfoil.coordinates] +
-        ["```"]
-    )
-
-    ### Continue doing the airfoil things
-    airfoil = airfoil.rotate(angle=-np.radians(alpha))
-    airfoil = airfoil.translate(
-        0,
-        height + 0.5 * np.sind(alpha)
-    )
-    fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=airfoil.x(),
-            y=airfoil.y(),
-            mode="lines",
-            name="Airfoil",
-            fill="toself",
-            line=dict(
-                color="blue"
-            )
-        )
-    )
-
-    ### Default text output
-    text_output = 'Click "Analyze" to compute aerodynamics!'
-
-    xrng = (-0.5, 1.5)
-    yrng = (-0.6, 0.6) if not ground_effect else (0, 1.2)
-
-    if analyze_button_pressed:
-
-        analysis = asb.AirfoilInviscid(
-            airfoil=airfoil.repanel(50),
-            op_point=asb.OperatingPoint(
-                velocity=1,
-                alpha=0,
-            ),
-            ground_effect=ground_effect
-        )
-
-        x = np.linspace(*xrng, 100)
-        y = np.linspace(*yrng, 100)
-        X, Y = np.meshgrid(x, y)
-        u, v = analysis.calculate_velocity(
-            x_field=X.flatten(),
-            y_field=Y.flatten()
-        )
-        U = u.reshape(X.shape)
-        V = v.reshape(Y.shape)
-
-        streamline_fig = ff.create_streamline(
-            x, y, U, V,
-            arrow_scale=1e-16,
-            density=streamline_density,
-            line=dict(
-                color="#ff82a3"
-            ),
-            name="Streamlines"
-        )
-
-        fig = go.Figure(
-            data=streamline_fig.data + fig.data
-        )
-
-        text_output = make_table(pd.DataFrame(
-            {
-                "Engineering Quantity": [
-                    "C_L"
-                ],
-                "Value"               : [
-                    f"{analysis.Cl:.3f}"
-                ]
-            }
-        ))
-
-    fig.update_layout(
-        xaxis_title="x/c",
-        yaxis_title="y/c",
-        showlegend=False,
-        yaxis=dict(scaleanchor="x", scaleratio=1),
-        margin={'t': 0},
-        title=None,
-    )
-
-    fig.update_xaxes(range=xrng)
-    fig.update_yaxes(range=yrng)
-
-    return fig, text_output, [coordinates_output]
-
-
-if __name__ == '__main__':
-    app.run_server(debug=False)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port="8050", debug=debug)
