@@ -2,5 +2,4 @@ plotly>= 4.14.3
 dash>= 1.19.0
 gunicorn>=20.0.4
 pandas>=2.0.1
-dash-uploader --pre
-# packaging==20.9
+
