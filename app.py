@@ -49,7 +49,15 @@ app.layout = html.Div([
     html.Div(children=[
         html.Button('Analyze Image', id='analyze-button', n_clicks=0),
         html.Div(id='output-image')
-    ], style={'width': '49%', 'padding': 10, 'flex': 1})
+    ], style={'width': '49%', 'padding': 10, 'flex': 1}),
+
+    html.Div(children=[
+        html.label('checklistAOA'),
+        dcc.Checklist(
+            ['0 degrees', '5 degrees', '10 degrees']
+            )
+    ])
+
 ], style={'display': 'flex', 'flex-direction': 'row'})
 
 def parse_contents(contents, filename, date):
