@@ -1,11 +1,14 @@
 from dash import Dash, html, dcc, dash_table
 import dash_bootstrap_components as dbc
 import base64
+import pathlib
 
-image_path1 = 'externalFlow.jpg'
-image_path2 = 'placeholder_image.png'
-image_path3 = 'externalFlow.jpg'
-image_path4 = 'externalFlow.jpg'
+CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
+
+image_path1 = CURRENT_DIR / 'externalFlow.jpg'
+image_path2 = CURRENT_DIR / 'placeholder_image.png'
+image_path3 = CURRENT_DIR / 'externalFlow.jpg'
+image_path4 = CURRENT_DIR / 'externalFlow.jpg'
 
 # Using base64 encoding and decoding
 def b64_image(image_filename):
