@@ -41,7 +41,7 @@ app.layout = html.Div([
             dbc.Row([
                 dbc.Col([
                     dcc.Markdown("""
-                        # [External Flow AAU Energy](https://externalflow.energy.aau.dk/)
+                        # External Flow
                         By [Jakob Hærvig](https://haervig.com/) and [Victor Hvass Mølbak](https://www.linkedin.com/in/victor-hvass-m%C3%B8lbak-3318aa1b6/).
                     """)
                 ], width=True),
@@ -157,14 +157,11 @@ def analyse_image(n_clicks, contents):
     # if contents is not None:
     if n_clicks is not None and n_clicks > 0:
         time.sleep(1)
-        rotate_newest_image("/app/uploads", 90)
+        rotate_newest_image("/externalflow/uploads", 90)
         #Return the rotated image path or encoded image content
         rotated_image_path = "rotated_image.png"
         encoded_image = base64.b64encode(open(rotated_image_path, 'rb').read()).decode('utf-8')
         return f"data:image/png;base64,{encoded_image}"
-
-
-
 
 @app.callback(
     Output('output-message', 'children'),
