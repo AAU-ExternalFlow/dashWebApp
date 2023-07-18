@@ -21,8 +21,6 @@ checklist_options = [
     {'label': '10degrees', 'value': '10d'}
 ]
 
-debug = False if os.environ["DASH_DEBUG_MODE"] == "False" else True
-
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 # app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, 'bootstrap.css'])
