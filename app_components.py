@@ -95,3 +95,27 @@ tab2Content = dbc.Card(
         ]
     )
 )
+
+tab3Content = dbc.Card(
+    dbc.CardBody(
+        [
+            html.P("This is tab 3!", className="card-text"),
+        ]
+    )
+)
+
+tab4Content = dbc.Card(
+    dbc.CardBody(
+        [
+            html.P("This is tab 4!", className="card-text"),
+        ]
+    )
+)
+
+tab5Content = dbc.Card(
+    dbc.CardBody(
+        [
+            html.P("This is tab 5!", className="card-text"),
+        ]
+    )
+)

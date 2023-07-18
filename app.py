@@ -73,8 +73,11 @@ app.layout = html.Div([
 
                 dbc.Col([
                     dbc.Tabs([
-                        dbc.Tab(tab1Content, label="Raw image Loaded", tab_id="tab-1"),
-                        dbc.Tab(tab2Content, label="Shape detection", tab_id="tab-2"),
+                        dbc.Tab(tab1Content, label="1. Raw image Loaded", tab_id="tab-1"),
+                        dbc.Tab(tab2Content, label="2. Shape detection", tab_id="tab-2"),
+                        dbc.Tab(tab3Content, label="3. Surface geometry", tab_id="tab-3"),
+                        dbc.Tab(tab4Content, label="4. Mesh", tab_id="tab-4"),
+                        dbc.Tab(tab5Content, label="5. Initial flow simulation", tab_id="tab-5"),
                     ],
                     id="tabs",
                     active_tab="tab-1",
