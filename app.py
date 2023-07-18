@@ -13,7 +13,8 @@ from app_components import *
 from rotate import *
 
 CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
-UPLOAD_DIRECTORY = "/externalflow/uploads"
+UPLOAD_DIR = CURRENT_DIR.parents[0] / 'uploads'
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 checklist_options = [
     {'label': '0degrees', 'value': '0d'},
@@ -41,13 +42,10 @@ app.layout = html.Div([
             dbc.Row([
                 dbc.Col([
                     dcc.Markdown("""
-                        # External Flow
+                        # External Flow: Aerodynamic analyser for abritrary 2D shapes
                         By [Jakob Hærvig](https://haervig.com/) and [Victor Hvass Mølbak](https://www.linkedin.com/in/victor-hvass-m%C3%B8lbak-3318aa1b6/).
                     """)
-                ], width=True),
-                dbc.Col([
-                    html.Img(src=b64_image(image_path), height="80px"),
-                ], width=1.7)
+                ], width=True)
             ], align="end"),
 
             html.Hr(),
@@ -75,8 +73,8 @@ app.layout = html.Div([
 
                 dbc.Col([
                     dbc.Tabs([
-                        dbc.Tab(tab1Content, label="Aerodynamisk analyse", tab_id="tab-1"),
-                        dbc.Tab(tab2Content, label="Billedanalyse", tab_id="tab-2"),
+                        dbc.Tab(tab1Content, label="Raw image Loaded", tab_id="tab-1"),
+                        dbc.Tab(tab2Content, label="Shape detection", tab_id="tab-2"),
                     ],
                     id="tabs",
                     active_tab="tab-1",
@@ -141,7 +139,7 @@ def analyse_image(n_clicks, contents):
 
         # Save the image to a file within the container's file system
         unique_filename = str(uuid.uuid4()) + '.jpg'
-        image_path = os.path.join(UPLOAD_DIRECTORY, unique_filename)
+        image_path = os.path.join(UPLOAD_DIR, unique_filename)
         with open(image_path, 'wb') as f:
             f.write(decoded)
 
@@ -157,7 +155,7 @@ def analyse_image(n_clicks, contents):
     # if contents is not None:
     if n_clicks is not None and n_clicks > 0:
         time.sleep(1)
-        rotate_newest_image("/externalflow/uploads", 90)
+        rotate_newest_image(UPLOAD_DIR, 90)
         #Return the rotated image path or encoded image content
         rotated_image_path = "rotated_image.png"
         encoded_image = base64.b64encode(open(rotated_image_path, 'rb').read()).decode('utf-8')
@@ -172,7 +170,7 @@ def save_checklist(checkbox_values):
     if checkbox_values:
         #Save the checklist as a text file
         filename = 'checklist.txt'
-        file_path = os.path.join(UPLOAD_DIRECTORY, filename)
+        file_path = os.path.join(UPLOAD_DIR, filename)
 
         #Sort the checklist values in the same order as the options
         sorted_values = sorted(checkbox_values, key=lambda x: [option['value'] for option in checklist_options].index(x))
