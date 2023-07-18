@@ -3,17 +3,17 @@ import datetime
 import base64
 import uuid
 import time
-# import sys
 from dash import Dash, html, dcc, dash_table
 from dash.dependencies import Input, Output, State
 import plotly.express as pu
 import pandas as pd
 import dash_bootstrap_components as dbc
-
+import pathlib
 from app_components import *
 from rotate import *
 
-UPLOAD_DIRECTORY = "/app/uploads" #
+CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
+UPLOAD_DIRECTORY = "/externalflow/uploads"
 
 checklist_options = [
     {'label': '0degrees', 'value': '0d'},
@@ -22,11 +22,9 @@ checklist_options = [
 ]
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
-# app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, 'bootstrap.css'])
 app = Dash(__name__)
 
-image_path = 'externalFlow.jpg'
+image_path = CURRENT_DIR / 'externalFlow.jpg'
 
 # Using base64 encoding and decoding
 def b64_image(image_filename):
@@ -184,8 +182,6 @@ def save_checklist(checkbox_values):
 
         with open(file_path, 'w') as f:
             f.write('\n'.join(sorted_values))
-
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port="8050", debug=False)
