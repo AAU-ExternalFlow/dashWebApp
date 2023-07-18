@@ -54,18 +54,25 @@ app.layout = html.Div([
                 dbc.Col([
                     dbc.Card([
                         dbc.CardBody(
-                            uploadImage,
+                            tabAContent,
                         ),
-                        dbc.Button("Angrebsvinkel", id="button_AOA", style={'marginBottom':'10px', 'marginTop':'-20px', 'width':'150px', 'marginLeft':'20px'}),
+                        html.Hr(),
+                        dbc.Button("Shape detection", id="button_shape_detection"),
                         dbc.Collapse(
                             dbc.Card(
                                 dbc.CardBody(
-                                    AOA_checklist,
+                                    tabBContent,
                                 )
                             ),
-                            id="collapse_AOA",
-                            is_open=False
+                            id="collapse_shape_detection",
+                            is_open=False,
                         ),
+                        html.Hr(),
+                        dbc.Button("Generate surface geometry", id="button_surface_geometry"),
+                        html.Hr(),
+                        dbc.Button("Generate mesh", id="button_mesh"),
+                        html.Hr(),
+                        dbc.Button("Run initial flow simulation", id="button_initial_flow_simulation"),
                 ]),
 
                     html.Div(id='hidden-output', style={'display': 'none'}),
@@ -92,27 +99,22 @@ app.layout = html.Div([
 
 
 
-#Callback to expand AOA menu.
+#Callback to expand shape detection menu.
 @app.callback(
-    Output("collapse_AOA", "is_open"),
-    [Input("button_AOA", "n_clicks")],
-    [State("collapse_AOA", "is_open")]
+    Output("collapse_shape_detection", "is_open"),
+    [Input("button_shape_detection", "n_clicks")],
+    [State("collapse_shape_detection", "is_open")]
 )
 def toggle_shape_collapse(n_clicks, is_open):
     if n_clicks:
         return not is_open
     return is_open
 
-
-
 def parse_contents(contents, filename, date):
     return html.Div([
         # html.H5(filename),
         #HTML images accept base64 encoded strings in the same format that is supplied by the upload
-        html.Img(src=contents, style={'max-width': '100%', 'max-height': '475px', 'width': 'auto', 'height': 'auto','margin-bottom': '10px'}),
-        dbc.Button("Analyser tegning", id='analyse-button', n_clicks=0),
-        html.Hr(),
-
+        dbc.Button("Load image", id='analyse-button', n_clicks=0),
     ])
 
 @app.callback(Output('output-image-upload', 'children'),

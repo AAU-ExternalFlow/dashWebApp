@@ -17,13 +17,11 @@ def b64_image(image_filename):
     return 'data:image/png;base64,' + base64.b64encode(image).decode('utf-8')
 
 
-uploadImage = [
-    # html.Div(children=[
+tabAContent = [
         dcc.Upload(
             id='upload-image',
             children=html.Div([
-                'Træk og slip eller ',
-                html.A('vælg fil')
+                html.A('Drag and drop (or click to browse) shape image')
             ]),
             style={
                 'width': '100%',
@@ -32,8 +30,7 @@ uploadImage = [
                 'borderWidth': '1px',
                 'borderStyle': 'dashed',
                 'borderRadius': '5px',
-                'textAlign': 'center',
-                'marginBottom': '10px'
+                'textAlign': 'center'
             },
             # Allow multiple files to be uploaded
             multiple=False
@@ -43,7 +40,7 @@ uploadImage = [
     # ]),
 ]
 
-AOA_checklist = [
+tabBContent = [
     html.Div(children=[
         html.Label('checklistAOA:'),
         html.Br(),
