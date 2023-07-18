@@ -188,4 +188,4 @@ def save_checklist(checkbox_values):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port="8050", debug=debug)
+    app.run(host="0.0.0.0", port="8050", debug=false)
