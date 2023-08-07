@@ -3,6 +3,7 @@ import datetime
 import base64
 import uuid
 import time
+import sys
 from dash import Dash, html, dcc, dash_table
 from dash.dependencies import Input, Output, State
 import plotly.express as pu
@@ -10,7 +11,25 @@ import pandas as pd
 import dash_bootstrap_components as dbc
 import pathlib
 from app_components import *
-from externalflow.imageProcessing.shape_detection.py import *
+# from externalflow.imageProcessing.shape_detection.py import *
+
+
+# Get the absolute path of the current directory
+current_directory = os.path.dirname(os.path.abspath(__file__))
+
+# Append paths of other directories to sys.path
+main_directory_path = os.path.join(current_directory, '..')  # Parent directory
+imageProcessing_path = os.path.join(current_directory, '..', 'imageProcessing')
+# third_directory_path = os.path.join(current_directory, '..', 'third_directory')
+
+sys.path.append(main_directory_path)
+sys.path.append(imageProcessing_path)
+# sys.path.append(third_directory_path)
+
+from shape_detection.py import image_rotate as image_rotate
+# from third_script import your_function as third_function
+
+
 
 CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
 UPLOAD_DIR = CURRENT_DIR.parents[0] / 'uploads'
