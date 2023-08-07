@@ -26,7 +26,7 @@ sys.path.append(main_directory_path)
 sys.path.append(imageProcessing_path)
 # sys.path.append(third_directory_path)
 
-from shape_detection.py import image_rotate as image_rotate
+from shape_detection import image_rotate as image_rotate
 # from third_script import your_function as third_function
 
 
