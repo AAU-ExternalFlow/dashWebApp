@@ -10,7 +10,7 @@ import pandas as pd
 import dash_bootstrap_components as dbc
 import pathlib
 from app_components import *
-from rotate import *
+from externalflow.imageProcessing.shape_detection.py import *
 
 CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
 UPLOAD_DIR = CURRENT_DIR.parents[0] / 'uploads'
