@@ -11,23 +11,23 @@ import pandas as pd
 import dash_bootstrap_components as dbc
 import pathlib
 from app_components import *
-# from externalflow.imageProcessing.shape_detection.py import *
+from imageProcessing.shape_detection.py import *
 
 
-# Get the absolute path of the current directory
-current_directory = os.path.dirname(os.path.abspath(__file__))
+# # Get the absolute path of the current directory
+# current_directory = os.path.dirname(os.path.abspath(__file__))
 
-# Append paths of other directories to sys.path
-main_directory_path = os.path.join(current_directory, '..')  # Parent directory
-imageProcessing_path = os.path.join(current_directory, '..', 'imageProcessing')
-# third_directory_path = os.path.join(current_directory, '..', 'third_directory')
+# # Append paths of other directories to sys.path
+# main_directory_path = os.path.join(current_directory, '..')  # Parent directory
+# imageProcessing_path = os.path.join(current_directory, '..', 'imageProcessing')
+# # third_directory_path = os.path.join(current_directory, '..', 'third_directory')
 
-sys.path.append(main_directory_path)
-sys.path.append(imageProcessing_path)
-# sys.path.append(third_directory_path)
+# sys.path.append(main_directory_path)
+# sys.path.append(imageProcessing_path)
+# # sys.path.append(third_directory_path)
 
-from shape_detection import image_rotate as image_rotate
-# from third_script import your_function as third_function
+# from shape_detection import image_rotate as image_rotate
+# # from third_script import your_function as third_function
 
 
 
@@ -128,6 +128,7 @@ def toggle_shape_collapse(n_clicks, is_open):
     if n_clicks:
         return not is_open
     return is_open
+
 
 def parse_contents(contents, filename, date):
     return html.Div([
