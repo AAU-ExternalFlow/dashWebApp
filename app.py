@@ -197,12 +197,14 @@ def analyse_image(n_clicks, contents):
     [Input('blur_slider', 'value'),
      Input('raw_image_path','data')], # Fetching raw_image_path from dcc.store
 )
-def blur_slider(value):
-    image_rotate(image_path, value)
-    #Return the rotated image path or encoded image content
-    blur_image_path = "blurred_image.png"
-    encoded_image = base64.b64encode(open(blur_image_path, 'rb').read()).decode('utf-8')
-    return f"data:image/png;base64,{encoded_image}"
+def blur_slider(value, image_path):
+    if image_path is not None:
+        image_rotate(image_path, value)
+        #Return the rotated image path or encoded image content
+        blur_image_path = "blurred_image.png"
+        encoded_image = base64.b64encode(open(blur_image_path, 'rb').read()).decode('utf-8')
+        return f"data:image/png;base64,{encoded_image}"
+    return None
 
 
 
