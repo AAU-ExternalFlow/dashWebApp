@@ -191,7 +191,7 @@ def analyse_image(n_clicks, contents):
 @app.callback(
     Output('blur_image', 'src'),
     Input('blur_slider', 'value'),
-    State('blur_image', 'src'),
+    # State('blur_image', 'src'),
     prevent_initial_call=True
 )
 def blur_slider(value):
