@@ -174,7 +174,6 @@ def analyse_image(n_clicks, contents):
 @app.callback(
     Output('analysed-image', 'src'),
     Input('analyse-button', 'n_clicks'),
-    Input('blur_slider', 'value'),
     State('analysed-image', 'src'),
     prevent_initial_call=True
 )
@@ -189,16 +188,18 @@ def analyse_image(n_clicks, blur_value, contents):
         return f"data:image/png;base64,{encoded_image}"
 
 
-# @app.callback(
-#     Output('blur_slider_output', 'children'),
-#     Input('blur_slider', 'value')
-# )
-# def blur_slider(value):
-#     image_rotate(UPLOAD_DIR, value)
-#     #Return the rotated image path or encoded image content
-#     rotated_image_path = "rotated_image.png"
-#     encoded_image = base64.b64encode(open(rotated_image_path, 'rb').read()).decode('utf-8')
-#     return f"data:image/png;base64,{encoded_image}"
+@app.callback(
+    Output('blur_image', 'src'),
+    Input('blur_slider', 'value'),
+    State('blur_image', 'src'),
+    prevent_initial_call=True
+)
+def blur_slider(value):
+    image_rotate(UPLOAD_DIR, value)
+    #Return the rotated image path or encoded image content
+    blur_image_path = "rotated_image.png"
+    encoded_image = base64.b64encode(open(blur_image_path, 'rb').read()).decode('utf-8')
+    return f"data:image/png;base64,{encoded_image}"
 
 
 
