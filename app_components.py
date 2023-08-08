@@ -42,19 +42,20 @@ tabAContent = [
 
 tabBContent = [
     html.Div(children=[
-        html.Label('checklistAOA:'),
-        html.Br(),
-        dcc.Checklist(
-            id='checklistAOA',
-            options=[
-                {'label': ' 0 grader', 'value': '0d'},
-                {'label': ' 5 grader', 'value': '5d'},
-                {'label': ' 10 grader', 'value': '10d'} 
-            ],
-            value=[]
-        ),
-        html.Div(id='outputAOA'),
-        html.Div(id='output-message')
+        dcc.Slider(0, 20, 2, id='blur_slider', value=10),
+        # html.Label('checklistAOA:'),
+        # html.Br(),
+        # dcc.Checklist(
+        #     id='checklistAOA',
+        #     options=[
+        #         {'label': ' 0 grader', 'value': '0d'},
+        #         {'label': ' 5 grader', 'value': '5d'},
+        #         {'label': ' 10 grader', 'value': '10d'} 
+        #     ],
+        #     value=[]
+        # ),
+        # html.Div(id='outputAOA'),
+        # html.Div(id='output-message')
     ]),
 ]
 
