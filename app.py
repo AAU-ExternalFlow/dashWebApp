@@ -94,7 +94,7 @@ app.layout = html.Div([
                         dbc.Button("Run initial flow simulation", id="button_initial_flow_simulation"),
                 ]),
 
-                    html.Div(id='hidden-output', style={'display': 'none'}),
+                    # html.Div(id='hidden-output', style={'display': 'none'}),
                 ], width=4),
 
                 dbc.Col([
