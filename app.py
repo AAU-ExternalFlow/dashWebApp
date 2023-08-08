@@ -94,7 +94,7 @@ app.layout = html.Div([
                         dbc.Button("Run initial flow simulation", id="button_initial_flow_simulation"),
                 ]),
 
-                    # html.Div(id='hidden-output', style={'display': 'none'}),
+                    html.Div(id='hidden-output', style={'display': 'none'}),
                 ], width=4),
 
                 dbc.Col([
@@ -130,7 +130,6 @@ def toggle_shape_collapse(n_clicks, is_open):
     return is_open
 
 
-
 def parse_contents(contents, filename, date):
     return html.Div([
         # html.H5(filename),
@@ -151,9 +150,10 @@ def update_output(contents, filename, date):
 
 
 @app.callback(
-    Output('hidden-output', 'children'),
-    Input('analyse-button', 'n_clicks'),
-    State('upload-image', 'contents'),
+    [Output('hidden-output', 'children'),
+     Output('raw_image', 'src')],
+    [Input('analyse-button', 'n_clicks')],
+    [State('upload-image', 'contents')],
     prevent_initial_call=True
 )
 def analyse_image(n_clicks, contents):
@@ -168,8 +168,11 @@ def analyse_image(n_clicks, contents):
         image_path = os.path.join(UPLOAD_DIR, image_filename)
         with open(image_path, 'wb') as f:
             f.write(decoded)
+        
+        encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('utf-8')
+        return [], f"data:image/png;base64,{encoded_image}"
 
-    return []
+    return [], None
 
 # @app.callback(
 #     Output('raw_image', 'src'),
