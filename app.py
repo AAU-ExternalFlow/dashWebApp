@@ -181,10 +181,10 @@ def analyse_image(n_clicks, contents):
 def analyse_image(n_clicks, blur_value, contents):
     # if contents is not None:
     if n_clicks is not None and n_clicks > 0:
-        # time.sleep(1)
-        # image_rotate(UPLOAD_DIR, blur_value)
+        time.sleep(1)
+        image_rotate(UPLOAD_DIR, blur_value)
         #Return the rotated image path or encoded image content
-        rotated_image_path = image_rotate(UPLOAD_DIR, blur_value)#"rotated_image.png"
+        rotated_image_path = "rotated_image.png"
         encoded_image = base64.b64encode(open(rotated_image_path, 'rb').read()).decode('utf-8')
         return f"data:image/png;base64,{encoded_image}"
 
