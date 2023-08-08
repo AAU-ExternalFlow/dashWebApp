@@ -193,10 +193,10 @@ def analyse_image(n_clicks, contents):
     Output('blur_image', 'src'),
     Input('blur_slider', 'value'),
     # State('blur_image', 'src'),
-    prevent_initial_call=True
+    
 )
 def blur_slider(value):
-    image_rotate(UPLOAD_DIR, value)
+    image_rotate(image_path, value)
     #Return the rotated image path or encoded image content
     blur_image_path = "rotated_image.png"
     encoded_image = base64.b64encode(open(blur_image_path, 'rb').read()).decode('utf-8')
