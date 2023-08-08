@@ -181,7 +181,7 @@ def analyse_image(n_clicks, contents):
 def analyse_image(n_clicks, contents):
     # if contents is not None:
     if n_clicks is not None and n_clicks > 0:
-        time.sleep(1)
+        # time.sleep(1)
         image_rotate(image_path, 90)
         #Return the rotated image path or encoded image content
         rotated_image_path = "rotated_image.png"
@@ -192,8 +192,6 @@ def analyse_image(n_clicks, contents):
 @app.callback(
     Output('blur_image', 'src'),
     Input('blur_slider', 'value'),
-    # State('blur_image', 'src'),
-    
 )
 def blur_slider(value):
     image_rotate(image_path, value)
