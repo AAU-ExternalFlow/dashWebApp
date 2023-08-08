@@ -55,6 +55,7 @@ def b64_image(image_filename):
 
 server = app.server
 app.layout = html.Div([
+    dcc.Store(id='raw_image_path'),  # Add a dcc.Store component
     dbc.Card(
         dbc.CardBody([
             # html.Br(),
@@ -151,7 +152,8 @@ def update_output(contents, filename, date):
 
 @app.callback(
     [Output('hidden-output', 'children'),
-     Output('raw_image', 'src')],
+     Output('raw_image', 'src'),
+     Output('raw_image_path','data')], # Update image path in dcc.store
     [Input('analyse-button', 'n_clicks')],
     [State('upload-image', 'contents')],
     prevent_initial_call=True
@@ -170,9 +172,9 @@ def analyse_image(n_clicks, contents):
             f.write(decoded)
         
         encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('utf-8')
-        return [], f"data:image/png;base64,{encoded_image}"
+        return [], f"data:image/png;base64,{encoded_image}", image_path
 
-    return [], None
+    return [], None, None
 
 # @app.callback(
 #     Output('raw_image', 'src'),
@@ -192,12 +194,13 @@ def analyse_image(n_clicks, contents):
 
 @app.callback(
     Output('blur_image', 'src'),
-    Input('blur_slider', 'value'),
+    [Input('blur_slider', 'value'),
+     Input('raw_image_path','data')], # Fetching raw_image_path from dcc.store
 )
 def blur_slider(value):
     image_rotate(image_path, value)
     #Return the rotated image path or encoded image content
-    blur_image_path = "rotated_image.png"
+    blur_image_path = "blurred_image.png"
     encoded_image = base64.b64encode(open(blur_image_path, 'rb').read()).decode('utf-8')
     return f"data:image/png;base64,{encoded_image}"
 
