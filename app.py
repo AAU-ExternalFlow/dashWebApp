@@ -164,7 +164,6 @@ def analyse_image(n_clicks, contents):
         decoded = base64.b64decode(content_string)
 
         # Save the image to a file within the container's file system
-        # unique_filename = str(uuid.uuid4()) + '.jpg'
         image_filename = 'raw_image.jpg'
         image_path = os.path.join(UPLOAD_DIR, image_filename)
         with open(image_path, 'wb') as f:
@@ -172,21 +171,20 @@ def analyse_image(n_clicks, contents):
 
     return []
 
-@app.callback(
-    Output('analysed-image', 'src'),
-    Input('analyse-button', 'n_clicks'),
-    State('analysed-image', 'src'),
-    prevent_initial_call=True
-)
-def analyse_image(n_clicks, contents):
-    # if contents is not None:
-    if n_clicks is not None and n_clicks > 0:
-        # time.sleep(1)
-        image_rotate(image_path, 90)
-        #Return the rotated image path or encoded image content
-        rotated_image_path = "rotated_image.png"
-        encoded_image = base64.b64encode(open(rotated_image_path, 'rb').read()).decode('utf-8')
-        return f"data:image/png;base64,{encoded_image}"
+# @app.callback(
+#     Output('raw_image', 'src'),
+#     Input('analyse-button', 'n_clicks'),
+#     State('raw_image', 'src'),
+#     prevent_initial_call=True
+# )
+# def analyse_image(n_clicks, contents):
+#     # if contents is not None:
+#     if n_clicks is not None and n_clicks > 0:
+#         image_rotate(image_path, 90)
+#         #Return the rotated image path or encoded image content
+#         rotated_image_path = "rotated_image.png"
+#         encoded_image = base64.b64encode(open(rotated_image_path, 'rb').read()).decode('utf-8')
+#         return f"data:image/png;base64,{encoded_image}"
 
 
 @app.callback(
