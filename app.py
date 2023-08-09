@@ -130,7 +130,7 @@ def toggle_shape_collapse(n_clicks, is_open):
         return not is_open
     return is_open
 
-
+# Show load image button when file is uploaded
 def parse_contents(contents, filename, date):
     return html.Div([
         # html.H5(filename),
@@ -138,6 +138,7 @@ def parse_contents(contents, filename, date):
         dbc.Button("Load image", id='analyse-button', n_clicks=0),
     ])
 
+# Upload callback
 @app.callback(Output('output-image-upload', 'children'),
               Input('upload-image', 'contents'),
               State('upload-image', 'filename'),
@@ -149,7 +150,7 @@ def update_output(contents, filename, date):
         ]
         return children
 
-
+# Load button is clicked
 @app.callback(
     [Output('hidden-output', 'children'),
      Output('raw_image', 'src'),
@@ -176,55 +177,38 @@ def analyse_image(n_clicks, contents):
 
     return [], None, None
 
-# @app.callback(
-#     Output('raw_image', 'src'),
-#     Input('analyse-button', 'n_clicks'),
-#     State('raw_image', 'src'),
-#     prevent_initial_call=True
-# )
-# def analyse_image(n_clicks, contents):
-#     # if contents is not None:
-#     if n_clicks is not None and n_clicks > 0:
-#         image_rotate(image_path, 90)
-#         #Return the rotated image path or encoded image content
-#         rotated_image_path = "rotated_image.png"
-#         encoded_image = base64.b64encode(open(rotated_image_path, 'rb').read()).decode('utf-8')
-#         return f"data:image/png;base64,{encoded_image}"
-
-
+# Blur slider 
 @app.callback(
-    Output('blur_image', 'src'),
+    Output('blur_image', 'src'), # Outputs blurred image 
     [Input('blur_slider', 'value'),
      Input('raw_image_path','data')], # Fetching raw_image_path from dcc.store
 )
 def blur_slider(value, image_path):
     if image_path is not None:
-        image_rotate(image_path, value)
-        #Return the rotated image path or encoded image content
-        # blur_image_path = "blurred_image.png"
-        # blur_image_path = image_rotate(image_path, value)
+        image_rotate(image_path, value) # Runs blur image script
+
         encoded_image = base64.b64encode(open("uploads/blurred_image.png", 'rb').read()).decode('utf-8')
         return f"data:image/png;base64,{encoded_image}"
     return None
 
 
+# Angle of attack checklist ###not currently in use
+# @app.callback(
+#     Output('output-message', 'children'),
+#     [Input('checklistAOA', 'value')],
+#     prevent_initial_call=True
+# )
+# def save_checklist(checkbox_values):
+#     if checkbox_values:
+#         #Save the checklist as a text file
+#         filename = 'checklist.txt'
+#         file_path = os.path.join(UPLOAD_DIR, filename)
 
-@app.callback(
-    Output('output-message', 'children'),
-    [Input('checklistAOA', 'value')],
-    prevent_initial_call=True
-)
-def save_checklist(checkbox_values):
-    if checkbox_values:
-        #Save the checklist as a text file
-        filename = 'checklist.txt'
-        file_path = os.path.join(UPLOAD_DIR, filename)
+#         #Sort the checklist values in the same order as the options
+#         sorted_values = sorted(checkbox_values, key=lambda x: [option['value'] for option in checklist_options].index(x))
 
-        #Sort the checklist values in the same order as the options
-        sorted_values = sorted(checkbox_values, key=lambda x: [option['value'] for option in checklist_options].index(x))
-
-        with open(file_path, 'w') as f:
-            f.write('\n'.join(sorted_values))
+#         with open(file_path, 'w') as f:
+#             f.write('\n'.join(sorted_values))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port="8050", debug=False)
