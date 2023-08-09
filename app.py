@@ -26,7 +26,7 @@ sys.path.append(main_directory_path)
 sys.path.append(imageProcessing_path)
 # sys.path.append(third_directory_path)
 
-from shape_detection import image_rotate as image_rotate
+import shape_detection
 # from third_script import your_function as third_function
 
 
@@ -185,7 +185,7 @@ def analyse_image(n_clicks, contents):
 )
 def blur_slider(value, image_path):
     if image_path is not None:
-        image_rotate(image_path, value) # Runs blur image script
+        shape_detection.image_rotate(image_path, value) # Runs blur image script
 
         encoded_image = base64.b64encode(open("uploads/blurred_image.png", 'rb').read()).decode('utf-8')
         return f"data:image/png;base64,{encoded_image}"
