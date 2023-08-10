@@ -220,7 +220,7 @@ def blur_slider(value, image_data):
         blurred_image_data = 'data:image/png;base64,' + base64.b64encode(blurred_content_bytes).decode('utf-8')
 
         return blurred_image_data, blurred_image_data  # You can store the blurred image in blur_image_store as well
-    return None, None
+    return '', ''
 
 @app.callback(
     [Output('canny_image_store', 'src'),
@@ -230,27 +230,27 @@ def blur_slider(value, image_data):
 )
 def canny_slider(value, image_data):
     if image_data is not None:
-        raise PreventUpdate
-    # Decode the base64 image data
-    _, content_string = image_data.split(',')
-    decoded_image = base64.b64decode(content_string)
 
-    # Convert the decoded image to numpy array
-    np_image = np.frombuffer(decoded_image, dtype=np.uint8)
-    image = cv2.imdecode(np_image, cv2.IMREAD_COLOR)
+        # Decode the base64 image data
+        _, content_string = image_data.split(',')
+        decoded_image = base64.b64decode(content_string)
 
-    # Apply canny
-    canny_image = shape_detection.canny(image, value[0], value[1])
+        # Convert the decoded image to numpy array
+        np_image = np.frombuffer(decoded_image, dtype=np.uint8)
+        image = cv2.imdecode(np_image, cv2.IMREAD_COLOR)
 
-    # Encode the blurred image back to base64
-    canny_content_bytes = cv2.imencode('.png', canny_image)[1].tobytes()
+        # Apply canny
+        canny_image = shape_detection.canny(image, value[0], value[1])
 
-    canny_image_data = 'data:image/png;base64,' + base64.b64encode(canny_content_bytes).decode('utf-8')
+        # Encode the blurred image back to base64
+        canny_content_bytes = cv2.imencode('.png', canny_image)[1].tobytes()
 
-    
+        canny_image_data = 'data:image/png;base64,' + base64.b64encode(canny_content_bytes).decode('utf-8')
 
-    return canny_image_data, canny_image_data  # You can store the blurred image in blur_image_store as well
-    return None, None
+        
+
+        return canny_image_data, canny_image_data  # You can store the blurred image in blur_image_store as well
+    return '', ''
 
 # @app.callback(
 #     [Output('bitwise_image_store', 'src'),
