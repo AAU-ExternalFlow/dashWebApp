@@ -233,7 +233,7 @@ def canny_slider(value, image_data_canny, _,):
     print("Canny slider callback triggered")
     print("Value:", value)
     if image_data_canny is not None:
-        
+        print("image data is not None")
         # Decode the base64 image data
         _, content_string = image_data_canny.split(',')
         decoded_image = base64.b64decode(content_string)
