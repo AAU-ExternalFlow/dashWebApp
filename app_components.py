@@ -68,6 +68,7 @@ tab1Content = dbc.Card(
     )
 )
 
+
 tab2Content = dbc.Card(
     dbc.CardBody(
         [
