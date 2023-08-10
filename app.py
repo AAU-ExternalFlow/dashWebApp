@@ -52,10 +52,13 @@ def b64_image(image_filename):
         image = f.read()
     return 'data:image/png;base64,' + base64.b64encode(image).decode('utf-8')
 
+dcc.Store(id='raw_image_store'),  # Add a dcc.Store component
+dcc.Store(id='blurred_image_store'),  # Add a dcc.Store component
+dcc.Store(id='canny_image_store'),  # Add a dcc.Store component
 
 server = app.server
 app.layout = html.Div([
-    dcc.Store(id='raw_image_path'),  # Add a dcc.Store component
+    
     dbc.Card(
         dbc.CardBody([
             # html.Br(),
@@ -130,52 +133,68 @@ def toggle_shape_collapse(n_clicks, is_open):
         return not is_open
     return is_open
 
-# Show load image button when file is uploaded
-def parse_contents(contents, filename, date):
-    return html.Div([
-        # html.H5(filename),
-        #HTML images accept base64 encoded strings in the same format that is supplied by the upload
-        dbc.Button("Load image", id='analyse-button', n_clicks=0),
-    ])
+# # Show load image button when file is uploaded
+# def parse_contents(contents, filename, date):
+#     return html.Div([
+#         # html.H5(filename),
+#         #HTML images accept base64 encoded strings in the same format that is supplied by the upload
+#         dbc.Button("Load image", id='analyse-button', n_clicks=0),
+#     ])
 
-# Upload callback
-@app.callback(Output('output-image-upload', 'children'),
-              Input('upload-image', 'contents'),
-              State('upload-image', 'filename'),
-              State('upload-image', 'last_modified'))
-def update_output(contents, filename, date):
+# # Upload callback
+# @app.callback(Output('output-image-upload', 'children'),
+#               Input('upload-image', 'contents'),
+#               State('upload-image', 'filename'),
+#               State('upload-image', 'last_modified'))
+# def update_output(contents, filename, date):
+#     if contents is not None:
+#         children = [
+#             parse_contents(contents, filename, date)
+#         ]
+#         return children
+
+@app.callback(Output('raw_image_store', 'data'),
+              Input('upload-image','contents')
+              )
+def upload_image(contents):
     if contents is not None:
-        children = [
-            parse_contents(contents, filename, date)
-        ]
-        return children
+        return contents
+    return None
 
-# Load button is clicked
-@app.callback(
-    [Output('hidden-output', 'children'),
-     Output('raw_image', 'src'),
-     Output('raw_image_path','data')], # Update image path in dcc.store
-    [Input('analyse-button', 'n_clicks')],
-    [State('upload-image', 'contents')],
-    prevent_initial_call=True
-)
-def analyse_image(n_clicks, contents):
-    # if contents is not None:
-    if n_clicks is not None and n_clicks > 0:
-        # Decode the contents of the uploaded file
-        _, content_string = contents.split(',')
-        decoded = base64.b64decode(content_string)
+@app.callback(Output('raw_image','src'),
+              Input('raw_image_store','data')
+              )
+def display_raw_image(image_data):
+    if image_data is not None:
+        return image_data
+    return ''
 
-        # Save the image to a file within the container's file system
-        image_filename = 'raw_image.jpg'
-        image_path = os.path.join(UPLOAD_DIR, image_filename)
-        with open(image_path, 'wb') as f:
-            f.write(decoded)
+# # Load button is clicked
+# @app.callback(
+#     [Output('hidden-output', 'children'),
+#      Output('raw_image', 'src'),
+#      Output('raw_image_path','data')], # Update image path in dcc.store
+#     [Input('analyse-button', 'n_clicks')],
+#     [State('upload-image', 'contents')],
+#     prevent_initial_call=True
+# )
+# def analyse_image(n_clicks, contents):
+#     # if contents is not None:
+#     if n_clicks is not None and n_clicks > 0:
+#         # Decode the contents of the uploaded file
+#         _, content_string = contents.split(',')
+#         decoded = base64.b64decode(content_string)
+
+#         # Save the image to a file within the container's file system
+#         image_filename = 'raw_image.jpg'
+#         image_path = os.path.join(UPLOAD_DIR, image_filename)
+#         with open(image_path, 'wb') as f:
+#             f.write(decoded)
         
-        encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('utf-8')
-        return [], f"data:image/png;base64,{encoded_image}", image_path
+#         encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('utf-8')
+#         return [], f"data:image/png;base64,{encoded_image}", image_path
 
-    return [], None, None
+#     return [], None, None
 
 # Blur slider
 @app.callback(
