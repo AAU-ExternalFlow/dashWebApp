@@ -76,7 +76,7 @@ tab2Content = dbc.Card(
         [
             dbc.Row([
                 dbc.Col([
-                    dcc.Markdown('''Step 1: Rå billedbehandling'''),
+                    dcc.Markdown('''Step 1: Blur'''),
                     html.Img(id="blur_image",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                     html.Br(),
                     dcc.Markdown('''Step 3: Roter vingeprofil til angivne angrebsvinkler'''),
