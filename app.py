@@ -10,6 +10,8 @@ import plotly.express as pu
 import pandas as pd
 import dash_bootstrap_components as dbc
 import pathlib
+import numpy as np
+import cv2
 from app_components import *
 
 
@@ -57,7 +59,7 @@ def b64_image(image_filename):
 server = app.server
 app.layout = html.Div([
     dcc.Store(id='raw_image_store'),  # Add a dcc.Store component
-    dcc.Store(id='blurred_image_store'),  # Add a dcc.Store component
+    dcc.Store(id='blur_image_store'),  # Add a dcc.Store component
     dcc.Store(id='canny_image_store'),  # Add a dcc.Store component
 
     dbc.Card(
@@ -134,44 +136,26 @@ def toggle_shape_collapse(n_clicks, is_open):
         return not is_open
     return is_open
 
-# # Show load image button when file is uploaded
-# def parse_contents(contents, filename, date):
-#     return html.Div([
-#         # html.H5(filename),
-#         #HTML images accept base64 encoded strings in the same format that is supplied by the upload
-#         dbc.Button("Load image", id='analyse-button', n_clicks=0),
-#     ])
-
-# # Upload callback
-# @app.callback(Output('output-image-upload', 'children'),
-#               Input('upload-image', 'contents'),
-#               State('upload-image', 'filename'),
-#               State('upload-image', 'last_modified'))
-# def update_output(contents, filename, date):
-#     if contents is not None:
-#         children = [
-#             parse_contents(contents, filename, date)
-#         ]
-#         return children
-
+#image upload, can save locally if uncomment the commented section
 @app.callback(
     Output('raw_image_store', 'data'),
     Input('upload-image', 'contents')
 )
 def upload_image(contents):
     if contents is not None:
-        # Decode the contents of the uploaded file
-        _, content_string = contents.split(',')
-        decoded = base64.b64decode(content_string)
+        # # Decode the contents of the uploaded file
+        # _, content_string = contents.split(',')
+        # decoded = base64.b64decode(content_string)
 
-        # Save the image to a file within the container's file system
-        image_filename = 'raw_image.jpg'
-        image_path = os.path.join(UPLOAD_DIR, image_filename)
-        with open(image_path, 'wb') as f:
-            f.write(decoded)
+        # # Save the image to a file within the container's file system
+        # image_filename = 'raw_image.jpg'
+        # image_path = os.path.join(UPLOAD_DIR, image_filename)
+        # with open(image_path, 'wb') as f:
+        #     f.write(decoded)
         return contents
     return None
 
+# Show the uploaded image
 @app.callback(
     Output('raw_image', 'src'),
     Input('raw_image_store', 'data')
@@ -210,17 +194,35 @@ def display_uploaded_image(image_data):
 
 # Blur slider
 @app.callback(
-    Output('blur_image', 'src'), # Outputs blurred image 
+    [Output('blur_image_store', 'src'),
+     Output('blur_image','src')], # Outputs blurred image 
     [Input('blur_slider', 'value'),
-     Input('raw_image_path','data')], # Fetching raw_image_path from dcc.store
+     Input('raw_image_store', 'data')], # Fetching raw_image_store from dcc.store
 )
-def blur_slider(value, image_path):
+def blur_slider(value, image_data):
     if image_path is not None:
-        shape_detection.image_rotate(image_path, value) # Runs blur image script
+        # Decode the base64 image data
+        _, content_string = image_data.split(',')
+        decoded_image = base64.b64decode(content_string)
 
-        encoded_image = base64.b64encode(open("uploads/blurred_image.png", 'rb').read()).decode('utf-8')
-        return f"data:image/png;base64,{encoded_image}"
-    return None
+        # Convert the decoded image to numpy array
+        np_image = np.frombuffer(decoded_image, dtype=np.uint8)
+        image = cv2.imdecode(np_image, cv2.IMREAD_COLOR)
+
+        # Apply Gaussian blur
+        blurred_image = shape_detection.gaussian_blur(image, value)
+
+        # Encode the blurred image back to base64
+        _, blurred_content_string = cv2.imencode('.png', blurred_image)[1].tostring()
+        blurred_image_data = 'data:image/png;base64,' + base64.b64encode(blurred_content_string).decode('utf-8')
+
+
+        # shape_detection.image_rotate(image_path, value) # Runs blur image script
+
+        # encoded_image = base64.b64encode(open("uploads/blurred_image.png", 'rb').read()).decode('utf-8')
+        # return f"data:image/png;base64,{encoded_image}"
+        return blurred_image_data, blurred_image_data  # You can store the blurred image in blur_image_store as well
+    return None, None
 
 
 # Angle of attack checklist ###not currently in use
