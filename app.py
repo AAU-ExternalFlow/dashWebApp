@@ -1,125 +1,125 @@
-# import os
-# import datetime
-# import base64
-# import uuid
-# import time
-# import sys
-# from dash import Dash, html, dcc, dash_table
-# from dash.dependencies import Input, Output, State
-# import plotly.express as pu
-# import pandas as pd
-# import dash_bootstrap_components as dbc
-# import pathlib
-# from app_components import *
+import os
+import datetime
+import base64
+import uuid
+import time
+import sys
+from dash import Dash, html, dcc, dash_table
+from dash.dependencies import Input, Output, State
+import plotly.express as pu
+import pandas as pd
+import dash_bootstrap_components as dbc
+import pathlib
+from app_components import *
 
 
 
-# # Get the absolute path of the current directory
-# current_directory = os.path.dirname(os.path.abspath(__file__))
+# Get the absolute path of the current directory
+current_directory = os.path.dirname(os.path.abspath(__file__))
 
-# # Append paths of other directories to sys.path
-# main_directory_path = os.path.join(current_directory, '..')  # Parent directory
-# imageProcessing_path = os.path.join(current_directory, '..', 'imageProcessing')
-# # third_directory_path = os.path.join(current_directory, '..', 'third_directory')
+# Append paths of other directories to sys.path
+main_directory_path = os.path.join(current_directory, '..')  # Parent directory
+imageProcessing_path = os.path.join(current_directory, '..', 'imageProcessing')
+# third_directory_path = os.path.join(current_directory, '..', 'third_directory')
 
-# sys.path.append(main_directory_path)
-# sys.path.append(imageProcessing_path)
-# # sys.path.append(third_directory_path)
+sys.path.append(main_directory_path)
+sys.path.append(imageProcessing_path)
+# sys.path.append(third_directory_path)
 
-# import shape_detection
-# # from third_script import your_function as third_function
-
-
-
-# CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
-# UPLOAD_DIR = CURRENT_DIR.parents[0] / 'uploads'
-# UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-
-# checklist_options = [
-#     {'label': '0degrees', 'value': '0d'},
-#     {'label': '5degrees', 'value': '5d'},
-#     {'label': '10degrees', 'value': '10d'}
-# ]
-
-# external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-# app = Dash(__name__)
-
-# image_path = CURRENT_DIR / 'externalFlow.jpg'
-
-# # Using base64 encoding and decoding
-# def b64_image(image_filename):
-#     with open(image_filename, 'rb') as f:
-#         image = f.read()
-#     return 'data:image/png;base64,' + base64.b64encode(image).decode('utf-8')
+import shape_detection
+# from third_script import your_function as third_function
 
 
 
-# server = app.server
-# app.layout = html.Div([
-#     dcc.Store(id='raw_image_store'),  # Add a dcc.Store component
-#     dcc.Store(id='blurred_image_store'),  # Add a dcc.Store component
-#     dcc.Store(id='canny_image_store'),  # Add a dcc.Store component
+CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
+UPLOAD_DIR = CURRENT_DIR.parents[0] / 'uploads'
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-#     dbc.Card(
-#         dbc.CardBody([
-#             # html.Br(),
-#             dbc.Row([
-#                 dbc.Col([
-#                     dcc.Markdown("""
-#                         # External Flow: Aerodynamic analyser for abritrary 2D shapes
-#                         By [Jakob Hærvig](https://haervig.com/) and [Victor Hvass Mølbak](https://www.linkedin.com/in/victor-hvass-m%C3%B8lbak-3318aa1b6/).
-#                     """)
-#                 ], width=True)
-#             ], align="end"),
+checklist_options = [
+    {'label': '0degrees', 'value': '0d'},
+    {'label': '5degrees', 'value': '5d'},
+    {'label': '10degrees', 'value': '10d'}
+]
 
-#             html.Hr(),
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+app = Dash(__name__)
 
-#             dbc.Row([
-#                 dbc.Col([
-#                     dbc.Card([
-#                         dbc.CardBody(
-#                             tabAContent,
-#                         ),
-#                         html.Hr(),
-#                         dbc.Button("Shape detection", id="button_shape_detection"),
-#                         dbc.Collapse(
-#                             dbc.Card(
-#                                 dbc.CardBody(
-#                                     tabBContent,
-#                                 )
-#                             ),
-#                             id="collapse_shape_detection",
-#                             is_open=False,
-#                         ),
-#                         html.Hr(),
-#                         dbc.Button("Generate surface geometry", id="button_surface_geometry"),
-#                         html.Hr(),
-#                         dbc.Button("Generate mesh", id="button_mesh"),
-#                         html.Hr(),
-#                         dbc.Button("Run initial flow simulation", id="button_initial_flow_simulation"),
-#                 ]),
+image_path = CURRENT_DIR / 'externalFlow.jpg'
 
-#                     html.Div(id='hidden-output', style={'display': 'none'}),
-#                 ], width=4),
+# Using base64 encoding and decoding
+def b64_image(image_filename):
+    with open(image_filename, 'rb') as f:
+        image = f.read()
+    return 'data:image/png;base64,' + base64.b64encode(image).decode('utf-8')
 
-#                 dbc.Col([
-#                     dbc.Tabs([
-#                         dbc.Tab(tab1Content, label="1. Raw image Loaded", tab_id="tab-1"),
-#                         dbc.Tab(tab2Content, label="2. Shape detection", tab_id="tab-2"),
-#                         dbc.Tab(tab3Content, label="3. Surface geometry", tab_id="tab-3"),
-#                         dbc.Tab(tab4Content, label="4. Mesh", tab_id="tab-4"),
-#                         dbc.Tab(tab5Content, label="5. Initial flow simulation", tab_id="tab-5"),
-#                     ],
-#                     id="tabs",
-#                     active_tab="tab-1",
-#                     ),
 
-#                     # html.Img(id="analysed-image", style={'max-width': '100%', 'max-height': '600px', 'width': 'auto', 'height': 'auto'}),       
-#                 ], width=8),
-#             ], align='start'),
-#         ])
-#     )
-# ])
+
+server = app.server
+app.layout = html.Div([
+    dcc.Store(id='raw_image_store'),  # Add a dcc.Store component
+    dcc.Store(id='blurred_image_store'),  # Add a dcc.Store component
+    dcc.Store(id='canny_image_store'),  # Add a dcc.Store component
+
+    dbc.Card(
+        dbc.CardBody([
+            # html.Br(),
+            dbc.Row([
+                dbc.Col([
+                    dcc.Markdown("""
+                        # External Flow: Aerodynamic analyser for abritrary 2D shapes
+                        By [Jakob Hærvig](https://haervig.com/) and [Victor Hvass Mølbak](https://www.linkedin.com/in/victor-hvass-m%C3%B8lbak-3318aa1b6/).
+                    """)
+                ], width=True)
+            ], align="end"),
+
+            html.Hr(),
+
+            dbc.Row([
+                dbc.Col([
+                    dbc.Card([
+                        dbc.CardBody(
+                            tabAContent,
+                        ),
+                        html.Hr(),
+                        dbc.Button("Shape detection", id="button_shape_detection"),
+                        dbc.Collapse(
+                            dbc.Card(
+                                dbc.CardBody(
+                                    tabBContent,
+                                )
+                            ),
+                            id="collapse_shape_detection",
+                            is_open=False,
+                        ),
+                        html.Hr(),
+                        dbc.Button("Generate surface geometry", id="button_surface_geometry"),
+                        html.Hr(),
+                        dbc.Button("Generate mesh", id="button_mesh"),
+                        html.Hr(),
+                        dbc.Button("Run initial flow simulation", id="button_initial_flow_simulation"),
+                ]),
+
+                    html.Div(id='hidden-output', style={'display': 'none'}),
+                ], width=4),
+
+                dbc.Col([
+                    dbc.Tabs([
+                        dbc.Tab(tab1Content, label="1. Raw image Loaded", tab_id="tab-1"),
+                        dbc.Tab(tab2Content, label="2. Shape detection", tab_id="tab-2"),
+                        dbc.Tab(tab3Content, label="3. Surface geometry", tab_id="tab-3"),
+                        dbc.Tab(tab4Content, label="4. Mesh", tab_id="tab-4"),
+                        dbc.Tab(tab5Content, label="5. Initial flow simulation", tab_id="tab-5"),
+                    ],
+                    id="tabs",
+                    active_tab="tab-1",
+                    ),
+
+                    # html.Img(id="analysed-image", style={'max-width': '100%', 'max-height': '600px', 'width': 'auto', 'height': 'auto'}),       
+                ], width=8),
+            ], align='start'),
+        ])
+    )
+])
 
 
 
@@ -236,26 +236,26 @@
 #     app.run(host="0.0.0.0", port="8050", debug=False)
 
 
-import base64
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
-from dash.dependencies import Input, Output
+# import base64
+# import dash
+# import dash_core_components as dcc
+# import dash_html_components as html
+# from dash.dependencies import Input, Output
 
-app = dash.Dash(__name__)
+# app = dash.Dash(__name__)
 
-app.layout = html.Div([
-    dcc.Upload(
-        id='upload-image',
-        children=html.Button('Upload Image'),
-        multiple=False
-    ),
-    dcc.Store(id='image-store'),
-    html.Img(id='display-image', src=''),
-])
+# app.layout = html.Div([
+#     dcc.Upload(
+#         id='upload-image',
+#         children=html.Button('Upload Image'),
+#         multiple=False
+#     ),
+#     dcc.Store(id='image-store'),
+#     html.Img(id='display-image', src=''),
+# ])
 
 @app.callback(
-    Output('image-store', 'data'),
+    Output('raw_image_store', 'data'),
     Input('upload-image', 'contents')
 )
 def upload_image(contents):
@@ -264,8 +264,8 @@ def upload_image(contents):
     return None
 
 @app.callback(
-    Output('display-image', 'src'),
-    Input('image-store', 'data')
+    Output('raw_image', 'src'),
+    Input('raw_image_store', 'data')
 )
 def display_uploaded_image(image_data):
     if image_data is not None:
