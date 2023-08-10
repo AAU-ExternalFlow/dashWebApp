@@ -4,7 +4,7 @@ import base64
 import uuid
 import time
 import sys
-from dash import Dash, html, dcc, dash_table
+from dash import Dash, html, dcc, dash_table, callback_context
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 import plotly.express as pu
@@ -218,24 +218,27 @@ def blur_slider(value, image_data):
         blurred_content_bytes = cv2.imencode('.png', blurred_image)[1].tobytes()
 
         blurred_image_data = 'data:image/png;base64,' + base64.b64encode(blurred_content_bytes).decode('utf-8')
-
-        return blurred_image_data, blurred_image_data  # You can store the blurred image in blur_image_store as well
+        last_update_timestamp = callback_context.triggered[0]['prop_id'].split('.')[0]
+        return blurred_image_data, blurred_image_data, last_update_timestamp
     return '', ''
 
 @app.callback(
     [Output('canny_image_store', 'src'),
      Output('canny_image','src')], # Outputs blurred image 
     [Input('canny_slider', 'value'),
-     Input('blur_image_store', 'data')], # Fetching raw_image_store from dcc.store
+     Input('blur_image_store', 'data'),
+     Input('blur_image_store', 'src'),
+     Input('blur_image_store', 'last_update_timestamp')], # Add the timestamp input
 )
-def canny_slider(value, image_data):
+def canny_slider(value, image_data_canny, _, last_update_timestamp):
     print("Canny slider callback triggered")
     print("Value:", value)
-    print("Image data:", image_data)
-    if image_data is not None:
+    print("Image data:", image_data_canny)
+    print("Last update timestamp:", last_update_timestamp)
+    if image_data_canny is not None:
         
         # Decode the base64 image data
-        _, content_string = image_data.split(',')
+        _, content_string = image_data_canny.split(',')
         decoded_image = base64.b64decode(content_string)
 
         # Convert the decoded image to numpy array
