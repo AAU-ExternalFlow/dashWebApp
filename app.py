@@ -229,8 +229,11 @@ def blur_slider(value, image_data):
      Input('blur_image_store', 'data')], # Fetching raw_image_store from dcc.store
 )
 def canny_slider(value, image_data):
+    print("Canny slider callback triggered")
+    print("Value:", value)
+    print("Image data:", image_data)
     if image_data is not None:
-
+        
         # Decode the base64 image data
         _, content_string = image_data.split(',')
         decoded_image = base64.b64decode(content_string)
