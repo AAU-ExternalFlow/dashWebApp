@@ -200,7 +200,7 @@ def display_uploaded_image(image_data):
      Input('raw_image_store', 'data')], # Fetching raw_image_store from dcc.store
 )
 def blur_slider(value, image_data):
-    if image_path is not None:
+    if image_data is not None:
         # Decode the base64 image data
         _, content_string = image_data.split(',')
         decoded_image = base64.b64decode(content_string)
