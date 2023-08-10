@@ -42,8 +42,10 @@ tabAContent = [
 
 tabBContent = [
     html.Div(children=[
+        dcc.Markdown('''Step 1: Blur'''),
         dcc.Slider(1, 25, 2, id='blur_slider', value=5, marks=None,tooltip={"placement": "bottom", "always_visible": True},updatemode='drag'),
         html.Hr(),
+        dcc.Markdown('''Step 2: Canny'''),
         dcc.RangeSlider(1, 500, value=[1, 500],id='canny_slider', marks=None,tooltip={"placement": "bottom", "always_visible": True},updatemode='drag')
         # html.Label('checklistAOA:'),
         # html.Br(),
@@ -80,7 +82,7 @@ tab2Content = dbc.Card(
                     html.Img(id="blur_image",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                     html.Br(),
                     dcc.Markdown('''Step 3: Roter vingeprofil til angivne angrebsvinkler'''),
-                    html.Img(src=b64_image(image_path2),style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto'},className="mx-auto d-block"),
+                    html.Img(id="bitwise_image",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto'},className="mx-auto d-block"),
                 ], width=6),
 
                 html.Hr(),

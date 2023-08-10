@@ -61,6 +61,7 @@ app.layout = html.Div([
     dcc.Store(id='raw_image_store'),  # Add a dcc.Store component
     dcc.Store(id='blur_image_store'),  # Add a dcc.Store component
     dcc.Store(id='canny_image_store'),  # Add a dcc.Store component
+    dcc.Store(id='bitwise_image_store'),  # Add a dcc.Store component
 
     dbc.Card(
         dbc.CardBody([
@@ -236,7 +237,7 @@ def canny_slider(value, image_data):
         np_image = np.frombuffer(decoded_image, dtype=np.uint8)
         image = cv2.imdecode(np_image, cv2.IMREAD_COLOR)
 
-        # Apply Gaussian blur
+        # Apply canny
         canny_image = shape_detection.canny(image, value[0], value[1])
 
         # Encode the blurred image back to base64
@@ -245,6 +246,32 @@ def canny_slider(value, image_data):
         canny_image_data = 'data:image/png;base64,' + base64.b64encode(canny_content_bytes).decode('utf-8')
 
         return canny_image_data, canny_image_data  # You can store the blurred image in blur_image_store as well
+    return None, None
+
+@app.callback(
+    [Output('bitwise_image_store', 'src'),
+     Output('bitwise_image','src')], # Outputs blurred image 
+     Input('canny_image_store', 'data'), # Fetching raw_image_store from dcc.store
+)
+def bitwise(image_data):
+    if image_data is not None:
+        # Decode the base64 image data
+        _, content_string = image_data.split(',')
+        decoded_image = base64.b64decode(content_string)
+
+        # Convert the decoded image to numpy array
+        np_image = np.frombuffer(decoded_image, dtype=np.uint8)
+        image = cv2.imdecode(np_image, cv2.IMREAD_COLOR)
+
+        # Apply Gaussian blur
+        bitwise_image = shape_detection.bitwise_not(image)
+
+        # Encode the blurred image back to base64
+        bitwise_content_bytes = cv2.imencode('.png', bitwise_image)[1].tobytes()
+
+        bitwise_image_data = 'data:image/png;base64,' + base64.b64encode(bitwise_content_bytes).decode('utf-8')
+
+        return bitwise_image_data, bitwise_image_data  # You can store the blurred image in blur_image_store as well
     return None, None
 
 # Angle of attack checklist ###not currently in use
