@@ -42,7 +42,7 @@ tabAContent = [
 
 tabBContent = [
     html.Div(children=[
-        dcc.Slider(1, 91, 2, id='blur_slider', value=10, marks=None,tooltip={"placement": "bottom", "always_visible": True},updatemode='drag'),
+        dcc.Slider(1, 15, 2, id='blur_slider', value=5, marks=None,tooltip={"placement": "bottom", "always_visible": True},updatemode='drag'),
         # html.Label('checklistAOA:'),
         # html.Br(),
         # dcc.Checklist(
