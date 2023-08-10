@@ -123,136 +123,36 @@ app.layout = html.Div([
 
 
 
-# #Callback to expand shape detection menu.
-# @app.callback(
-#     Output("collapse_shape_detection", "is_open"),
-#     [Input("button_shape_detection", "n_clicks")],
-#     [State("collapse_shape_detection", "is_open")]
-# )
-# def toggle_shape_collapse(n_clicks, is_open):
-#     if n_clicks:
-#         return not is_open
-#     return is_open
+#Callback to expand shape detection menu.
+@app.callback(
+    Output("collapse_shape_detection", "is_open"),
+    [Input("button_shape_detection", "n_clicks")],
+    [State("collapse_shape_detection", "is_open")]
+)
+def toggle_shape_collapse(n_clicks, is_open):
+    if n_clicks:
+        return not is_open
+    return is_open
 
-# # # Show load image button when file is uploaded
-# # def parse_contents(contents, filename, date):
-# #     return html.Div([
-# #         # html.H5(filename),
-# #         #HTML images accept base64 encoded strings in the same format that is supplied by the upload
-# #         dbc.Button("Load image", id='analyse-button', n_clicks=0),
-# #     ])
+# # Show load image button when file is uploaded
+# def parse_contents(contents, filename, date):
+#     return html.Div([
+#         # html.H5(filename),
+#         #HTML images accept base64 encoded strings in the same format that is supplied by the upload
+#         dbc.Button("Load image", id='analyse-button', n_clicks=0),
+#     ])
 
-# # # Upload callback
-# # @app.callback(Output('output-image-upload', 'children'),
-# #               Input('upload-image', 'contents'),
-# #               State('upload-image', 'filename'),
-# #               State('upload-image', 'last_modified'))
-# # def update_output(contents, filename, date):
-# #     if contents is not None:
-# #         children = [
-# #             parse_contents(contents, filename, date)
-# #         ]
-# #         return children
-
-# @app.callback(
-#     Output('raw_image_store', 'data'),
-#     Input('upload-image','contents')
-# )
-# def upload_image(contents):
+# # Upload callback
+# @app.callback(Output('output-image-upload', 'children'),
+#               Input('upload-image', 'contents'),
+#               State('upload-image', 'filename'),
+#               State('upload-image', 'last_modified'))
+# def update_output(contents, filename, date):
 #     if contents is not None:
-#         return contents
-#     return None
-
-# @app.callback(
-#     Output('raw_image', 'src'),
-#     Input('raw_image_store', 'data')
-# )
-# def display_raw_image(image_data):
-#     if image_data is not None:
-#         return image_data
-#     return ''
-
-# # # Load button is clicked
-# # @app.callback(
-# #     [Output('hidden-output', 'children'),
-# #      Output('raw_image', 'src'),
-# #      Output('raw_image_path','data')], # Update image path in dcc.store
-# #     [Input('analyse-button', 'n_clicks')],
-# #     [State('upload-image', 'contents')],
-# #     prevent_initial_call=True
-# # )
-# # def analyse_image(n_clicks, contents):
-# #     # if contents is not None:
-# #     if n_clicks is not None and n_clicks > 0:
-# #         # Decode the contents of the uploaded file
-# #         _, content_string = contents.split(',')
-# #         decoded = base64.b64decode(content_string)
-
-# #         # Save the image to a file within the container's file system
-# #         image_filename = 'raw_image.jpg'
-# #         image_path = os.path.join(UPLOAD_DIR, image_filename)
-# #         with open(image_path, 'wb') as f:
-# #             f.write(decoded)
-        
-# #         encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('utf-8')
-# #         return [], f"data:image/png;base64,{encoded_image}", image_path
-
-# #     return [], None, None
-
-# # Blur slider
-# @app.callback(
-#     Output('blur_image', 'src'), # Outputs blurred image 
-#     [Input('blur_slider', 'value'),
-#      Input('raw_image_path','data')], # Fetching raw_image_path from dcc.store
-# )
-# def blur_slider(value, image_path):
-#     if image_path is not None:
-#         shape_detection.image_rotate(image_path, value) # Runs blur image script
-
-#         encoded_image = base64.b64encode(open("uploads/blurred_image.png", 'rb').read()).decode('utf-8')
-#         return f"data:image/png;base64,{encoded_image}"
-#     return None
-
-
-# # Angle of attack checklist ###not currently in use
-# # @app.callback(
-# #     Output('output-message', 'children'),
-# #     [Input('checklistAOA', 'value')],
-# #     prevent_initial_call=True
-# # )
-# # def save_checklist(checkbox_values):
-# #     if checkbox_values:
-# #         #Save the checklist as a text file
-# #         filename = 'checklist.txt'
-# #         file_path = os.path.join(UPLOAD_DIR, filename)
-
-# #         #Sort the checklist values in the same order as the options
-# #         sorted_values = sorted(checkbox_values, key=lambda x: [option['value'] for option in checklist_options].index(x))
-
-# #         with open(file_path, 'w') as f:
-# #             f.write('\n'.join(sorted_values))
-
-# if __name__ == "__main__":
-#     app.run(host="0.0.0.0", port="8050", debug=False)
-
-
-# import base64
-# import dash
-# import dash_core_components as dcc
-# import dash_html_components as html
-# from dash.dependencies import Input, Output
-
-# app = dash.Dash(__name__)
-
-# app.layout = html.Div([
-#     dcc.Upload(
-#         id='upload-image',
-#         children=html.Button('Upload Image'),
-#         multiple=False
-#     ),
-#     dcc.Store(id='image-store'),
-#     html.Img(id='display-image', src=''),
-# ])
+#         children = [
+#             parse_contents(contents, filename, date)
+#         ]
+#         return children
 
 @app.callback(
     Output('raw_image_store', 'data'),
@@ -271,6 +171,85 @@ def display_uploaded_image(image_data):
     if image_data is not None:
         return image_data
     return ''
+
+# # Load button is clicked
+# @app.callback(
+#     [Output('hidden-output', 'children'),
+#      Output('raw_image', 'src'),
+#      Output('raw_image_path','data')], # Update image path in dcc.store
+#     [Input('analyse-button', 'n_clicks')],
+#     [State('upload-image', 'contents')],
+#     prevent_initial_call=True
+# )
+# def analyse_image(n_clicks, contents):
+#     # if contents is not None:
+#     if n_clicks is not None and n_clicks > 0:
+#         # Decode the contents of the uploaded file
+#         _, content_string = contents.split(',')
+#         decoded = base64.b64decode(content_string)
+
+#         # Save the image to a file within the container's file system
+#         image_filename = 'raw_image.jpg'
+#         image_path = os.path.join(UPLOAD_DIR, image_filename)
+#         with open(image_path, 'wb') as f:
+#             f.write(decoded)
+        
+#         encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('utf-8')
+#         return [], f"data:image/png;base64,{encoded_image}", image_path
+
+#     return [], None, None
+
+# Blur slider
+@app.callback(
+    Output('blur_image', 'src'), # Outputs blurred image 
+    [Input('blur_slider', 'value'),
+     Input('raw_image_path','data')], # Fetching raw_image_path from dcc.store
+)
+def blur_slider(value, image_path):
+    if image_path is not None:
+        shape_detection.image_rotate(image_path, value) # Runs blur image script
+
+        encoded_image = base64.b64encode(open("uploads/blurred_image.png", 'rb').read()).decode('utf-8')
+        return f"data:image/png;base64,{encoded_image}"
+    return None
+
+
+# Angle of attack checklist ###not currently in use
+# @app.callback(
+#     Output('output-message', 'children'),
+#     [Input('checklistAOA', 'value')],
+#     prevent_initial_call=True
+# )
+# def save_checklist(checkbox_values):
+#     if checkbox_values:
+#         #Save the checklist as a text file
+#         filename = 'checklist.txt'
+#         file_path = os.path.join(UPLOAD_DIR, filename)
+
+#         #Sort the checklist values in the same order as the options
+#         sorted_values = sorted(checkbox_values, key=lambda x: [option['value'] for option in checklist_options].index(x))
+
+#         with open(file_path, 'w') as f:
+#             f.write('\n'.join(sorted_values))
+
+
+# @app.callback(
+#     Output('raw_image_store', 'data'),
+#     Input('upload-image', 'contents')
+# )
+# def upload_image(contents):
+#     if contents is not None:
+#         return contents
+#     return None
+
+# @app.callback(
+#     Output('raw_image', 'src'),
+#     Input('raw_image_store', 'data')
+# )
+# def display_uploaded_image(image_data):
+#     if image_data is not None:
+#         return image_data
+#     return ''
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port="8050", debug=False)
