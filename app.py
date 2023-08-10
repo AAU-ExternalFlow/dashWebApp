@@ -160,6 +160,15 @@ def toggle_shape_collapse(n_clicks, is_open):
 )
 def upload_image(contents):
     if contents is not None:
+        # Decode the contents of the uploaded file
+        _, content_string = contents.split(',')
+        decoded = base64.b64decode(content_string)
+
+        # Save the image to a file within the container's file system
+        image_filename = 'raw_image.jpg'
+        image_path = os.path.join(UPLOAD_DIR, image_filename)
+        with open(image_path, 'wb') as f:
+            f.write(decoded)
         return contents
     return None
 
@@ -232,24 +241,6 @@ def blur_slider(value, image_path):
 #         with open(file_path, 'w') as f:
 #             f.write('\n'.join(sorted_values))
 
-
-# @app.callback(
-#     Output('raw_image_store', 'data'),
-#     Input('upload-image', 'contents')
-# )
-# def upload_image(contents):
-#     if contents is not None:
-#         return contents
-#     return None
-
-# @app.callback(
-#     Output('raw_image', 'src'),
-#     Input('raw_image_store', 'data')
-# )
-# def display_uploaded_image(image_data):
-#     if image_data is not None:
-#         return image_data
-#     return ''
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port="8050", debug=False)
