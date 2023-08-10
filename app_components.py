@@ -63,7 +63,7 @@ tab1Content = dbc.Card(
     dbc.CardBody(
         [
             # html.P("This is tab 1!", className="card-text"),
-            html.Img(id="raw_image", style={'max-width': '100%', 'max-height': '600px', 'width': 'auto', 'height': 'auto'}),
+            html.Img(id="raw_image", src='', style={'max-width': '100%', 'max-height': '600px', 'width': 'auto', 'height': 'auto'}),
         ]
     )
 )
