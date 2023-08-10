@@ -201,6 +201,7 @@ def display_uploaded_image(image_data):
 )
 def blur_slider(value, image_data):
     if image_data is not None:
+        value = max(1, value) if value % 2 == 0 else max(1, value + 1)
         # Decode the base64 image data
         _, content_string = image_data.split(',')
         decoded_image = base64.b64decode(content_string)
