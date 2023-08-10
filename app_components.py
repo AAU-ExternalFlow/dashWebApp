@@ -43,6 +43,8 @@ tabAContent = [
 tabBContent = [
     html.Div(children=[
         dcc.Slider(1, 15, 2, id='blur_slider', value=5, marks=None,tooltip={"placement": "bottom", "always_visible": True},updatemode='drag'),
+        html.Hr(),
+        dcc.RangeSlider(1, 200, value=[1, 200],id='canny_slider', marks=None,tooltip={"placement": "bottom", "always_visible": True},updatemode='drag')
         # html.Label('checklistAOA:'),
         # html.Br(),
         # dcc.Checklist(
@@ -84,8 +86,8 @@ tab2Content = dbc.Card(
                 html.Hr(),
 
                 dbc.Col([
-                    dcc.Markdown('''Step 2: Konverter overflade til punkter i x-y koordinatsystem'''),
-                    html.Img(src=b64_image(image_path3),style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
+                    dcc.Markdown('''Step 2: Canny'''),
+                    html.Img(id="canny_image",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                     html.Br(),
                     dcc.Markdown('''Step 4: Omdan koordinater til 3D geometri'''),
                     html.Img(src=b64_image(image_path1),style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto'},className="mx-auto d-block"),

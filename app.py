@@ -201,7 +201,6 @@ def display_uploaded_image(image_data):
 )
 def blur_slider(value, image_data):
     if image_data is not None:
-        
         # Decode the base64 image data
         _, content_string = image_data.split(',')
         decoded_image = base64.b64decode(content_string)
@@ -214,20 +213,39 @@ def blur_slider(value, image_data):
         blurred_image = shape_detection.gaussian_blur(image, value)
 
         # Encode the blurred image back to base64
-        # _, blurred_content_string = cv2.imencode('.png', blurred_image)[1].tostring()
         blurred_content_bytes = cv2.imencode('.png', blurred_image)[1].tobytes()
 
         blurred_image_data = 'data:image/png;base64,' + base64.b64encode(blurred_content_bytes).decode('utf-8')
 
-
-
-        # shape_detection.image_rotate(image_path, value) # Runs blur image script
-
-        # encoded_image = base64.b64encode(open("uploads/blurred_image.png", 'rb').read()).decode('utf-8')
-        # return f"data:image/png;base64,{encoded_image}"
         return blurred_image_data, blurred_image_data  # You can store the blurred image in blur_image_store as well
     return None, None
 
+@app.callback(
+    [Output('canny_image_store', 'src'),
+     Output('canny_image','src')], # Outputs blurred image 
+    [Input('canny_slider', 'value'),
+     Input('raw_image_store', 'data')], # Fetching raw_image_store from dcc.store
+)
+def canny_slider(value, image_data):
+    if image_data is not None:
+        # Decode the base64 image data
+        _, content_string = image_data.split(',')
+        decoded_image = base64.b64decode(content_string)
+
+        # Convert the decoded image to numpy array
+        np_image = np.frombuffer(decoded_image, dtype=np.uint8)
+        image = cv2.imdecode(np_image, cv2.IMREAD_COLOR)
+
+        # Apply Gaussian blur
+        canny_image = shape_detection.canny(image, value[0], value[1])
+
+        # Encode the blurred image back to base64
+        canny_content_bytes = cv2.imencode('.png', canny_image)[1].tobytes()
+
+        canny_image_data = 'data:image/png;base64,' + base64.b64encode(canny_content_bytes).decode('utf-8')
+
+        return canny_image_data, canny_image_data  # You can store the blurred image in blur_image_store as well
+    return None, None
 
 # Angle of attack checklist ###not currently in use
 # @app.callback(
