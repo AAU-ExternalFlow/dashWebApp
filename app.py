@@ -213,8 +213,11 @@ def blur_slider(value, image_data):
         blurred_image = shape_detection.gaussian_blur(image, value)
 
         # Encode the blurred image back to base64
-        _, blurred_content_string = cv2.imencode('.png', blurred_image)[1].tostring()
-        blurred_image_data = 'data:image/png;base64,' + base64.b64encode(blurred_content_string).decode('utf-8')
+        # _, blurred_content_string = cv2.imencode('.png', blurred_image)[1].tostring()
+        blurred_content_bytes = cv2.imencode('.png', blurred_image)[1].tobytes()
+
+        blurred_image_data = 'data:image/png;base64,' + base64.b64encode(blurred_content_bytes).decode('utf-8')
+
 
 
         # shape_detection.image_rotate(image_path, value) # Runs blur image script
