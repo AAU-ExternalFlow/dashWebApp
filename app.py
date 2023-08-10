@@ -218,8 +218,8 @@ def blur_slider(value, image_data):
         blurred_content_bytes = cv2.imencode('.png', blurred_image)[1].tobytes()
 
         blurred_image_data = 'data:image/png;base64,' + base64.b64encode(blurred_content_bytes).decode('utf-8')
-        last_update_timestamp = callback_context.triggered[0]['prop_id'].split('.')[0]
-        return blurred_image_data, blurred_image_data, last_update_timestamp
+        
+        return blurred_image_data, blurred_image_data
     return '', ''
 
 @app.callback(
@@ -227,14 +227,11 @@ def blur_slider(value, image_data):
      Output('canny_image','src')], # Outputs blurred image 
     [Input('canny_slider', 'value'),
      Input('blur_image_store', 'data'),
-     Input('blur_image_store', 'src'),
-     Input('blur_image_store', 'last_update_timestamp')], # Add the timestamp input
+     Input('blur_image_store', 'src')], # Add the timestamp input
 )
-def canny_slider(value, image_data_canny, _, last_update_timestamp):
+def canny_slider(value, image_data_canny, _,):
     print("Canny slider callback triggered")
     print("Value:", value)
-    print("Image data:", image_data_canny)
-    print("Last update timestamp:", last_update_timestamp)
     if image_data_canny is not None:
         
         # Decode the base64 image data
@@ -252,8 +249,7 @@ def canny_slider(value, image_data_canny, _, last_update_timestamp):
         canny_content_bytes = cv2.imencode('.png', canny_image)[1].tobytes()
 
         canny_image_data = 'data:image/png;base64,' + base64.b64encode(canny_content_bytes).decode('utf-8')
-
-        
+    
 
         return canny_image_data, canny_image_data  # You can store the blurred image in blur_image_store as well
     return '', ''
