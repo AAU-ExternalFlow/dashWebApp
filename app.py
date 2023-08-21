@@ -63,6 +63,7 @@ app.layout = html.Div([
     dcc.Store(id='blur_image_store'),  # Add a dcc.Store component
     dcc.Store(id='canny_image_store'),  # Add a dcc.Store component
     dcc.Store(id='bitwise_image_store'),  # Add a dcc.Store component
+    dcc.Store(id='coords_store'),
 
     dbc.Card(
         dbc.CardBody([
@@ -175,7 +176,8 @@ def display_storred_images(raw_image_data, blur_image_data, canny_image_data, bi
 @app.callback(
     [Output('blur_image_store', 'data'),
      Output('canny_image_store', 'data'),
-     Output('bitwise_image_store', 'data')],
+     Output('bitwise_image_store', 'data'),
+     Output('coords_store', 'data')],
     [Input('blur_slider', 'value'),
      Input('canny_slider', 'value'),
      Input('raw_image_store', 'data')]
@@ -211,11 +213,11 @@ def process_images(blur_value, canny_value, image_data):
 
         bitwise_content_bytes = cv2.imencode('.png', bitwise_image)[1].tobytes()
         bitwise_image_data = 'data:image/png;base64,' + base64.b64encode(bitwise_content_bytes).decode('utf-8')
-        
-        print(coords)
-        return blurred_image_data, canny_image_data, bitwise_image_data
 
-    return '', '', ''  # Return empty data if image_data is None
+        print(coords)
+        return blurred_image_data, canny_image_data, bitwise_image_data, coords
+
+    return '', '', '', ''  # Return empty data if image_data is None
 
 # Angle of attack checklist ###not currently in use
 # @app.callback(
