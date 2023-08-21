@@ -81,7 +81,7 @@ tab2Content = dbc.Card(
                     dcc.Markdown('''Step 1: Blur'''),
                     html.Img(id="blur_image",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                     html.Br(),
-                    dcc.Markdown('''Step 3: Roter vingeprofil til angivne angrebsvinkler'''),
+                    dcc.Markdown('''Step 3: Bitwise'''),
                     html.Img(id="bitwise_image",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto'},className="mx-auto d-block"),
                 ], width=6),
 

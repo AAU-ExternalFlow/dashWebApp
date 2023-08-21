@@ -161,12 +161,14 @@ def upload_image(contents):
 @app.callback(
     [Output('raw_image', 'src'),
      Output('blur_image','src'),
-     Output('canny_image','src')],
+     Output('canny_image','src'),
+     Output('bitwise_image','src'),],
     [Input('raw_image_store', 'data'),
      Input('blur_image_store', 'data'),
-     Input('canny_image_store', 'data')]
+     Input('canny_image_store', 'data'),
+     Input('bitwise_image_store', 'data'),]
 )
-def display_storred_images(raw_image_data, blur_image_data, canny_image_data):
+def display_storred_images(raw_image_data, blur_image_data, canny_image_data, bitwise_image_data):
     return raw_image_data, blur_image_data, canny_image_data
 
 # # Load button is clicked
@@ -257,7 +259,8 @@ def display_storred_images(raw_image_data, blur_image_data, canny_image_data):
 
 @app.callback(
     [Output('blur_image_store', 'data'),
-     Output('canny_image_store', 'data')],
+     Output('canny_image_store', 'data'),
+     Output('bitwise_image_store', 'data')],
     [Input('blur_slider', 'value'),
      Input('canny_slider', 'value'),
      Input('raw_image_store', 'data')]
@@ -278,6 +281,9 @@ def process_images(blur_value, canny_value, image_data):
         # Apply canny
         canny_image = shape_detection.canny(blurred_image, canny_value[0], canny_value[1])
 
+        # Apply bitwise
+        bitwise_image = shape_detection.bitwise_not(canny_image)
+
         # Encode the images back to base64
         blurred_content_bytes = cv2.imencode('.png', blurred_image)[1].tobytes()
         blurred_image_data = 'data:image/png;base64,' + base64.b64encode(blurred_content_bytes).decode('utf-8')
@@ -285,9 +291,12 @@ def process_images(blur_value, canny_value, image_data):
         canny_content_bytes = cv2.imencode('.png', canny_image)[1].tobytes()
         canny_image_data = 'data:image/png;base64,' + base64.b64encode(canny_content_bytes).decode('utf-8')
 
-        return blurred_image_data, canny_image_data
+        bitwise_content_bytes = cv2.imencode('.png', bitwise_image)[1].tobytes()
+        bitwise_image_data = 'data:image/png;base64,' + base64.b64encode(bitwise_content_bytes).decode('utf-8')
 
-    return '', ''  # Return empty data if image_data is None
+        return blurred_image_data, canny_image_data, bitwise_image_data
+
+    return '', '',''  # Return empty data if image_data is None
 
 # @app.callback(
 #     [Output('bitwise_image_store', 'src'),
