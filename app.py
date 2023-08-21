@@ -171,91 +171,6 @@ def upload_image(contents):
 def display_storred_images(raw_image_data, blur_image_data, canny_image_data, bitwise_image_data):
     return raw_image_data, blur_image_data, canny_image_data, bitwise_image_data
 
-# # Load button is clicked
-# @app.callback(
-#     [Output('hidden-output', 'children'),
-#      Output('raw_image', 'src'),
-#      Output('raw_image_path','data')], # Update image path in dcc.store
-#     [Input('analyse-button', 'n_clicks')],
-#     [State('upload-image', 'contents')],
-#     prevent_initial_call=True
-# )
-# def analyse_image(n_clicks, contents):
-#     # if contents is not None:
-#     if n_clicks is not None and n_clicks > 0:
-#         # Decode the contents of the uploaded file
-#         _, content_string = contents.split(',')
-#         decoded = base64.b64decode(content_string)
-
-#         # Save the image to a file within the container's file system
-#         image_filename = 'raw_image.jpg'
-#         image_path = os.path.join(UPLOAD_DIR, image_filename)
-#         with open(image_path, 'wb') as f:
-#             f.write(decoded)
-        
-#         encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('utf-8')
-#         return [], f"data:image/png;base64,{encoded_image}", image_path
-
-#     return [], None, None
-
-# # Blur slider
-# @app.callback(
-#     [Output('blur_image_store', 'src'),
-#      Output('blur_image','src')], # Outputs blurred image 
-#     [Input('blur_slider', 'value'),
-#      Input('raw_image_store', 'data')], # Fetching raw_image_store from dcc.store
-# )
-# def blur_slider(value, image_data):
-#     if image_data is not None:
-#         # Decode the base64 image data
-#         _, content_string = image_data.split(',')
-#         decoded_image = base64.b64decode(content_string)
-
-#         # Convert the decoded image to numpy array
-#         np_image = np.frombuffer(decoded_image, dtype=np.uint8)
-#         image = cv2.imdecode(np_image, cv2.IMREAD_COLOR)
-
-#         # Apply Gaussian blur
-#         blurred_image = shape_detection.gaussian_blur(image, value)
-
-#         # Encode the blurred image back to base64
-#         blurred_content_bytes = cv2.imencode('.png', blurred_image)[1].tobytes()
-
-#         blurred_image_data = 'data:image/png;base64,' + base64.b64encode(blurred_content_bytes).decode('utf-8')
-        
-#         return blurred_image_data, blurred_image_data
-#     return '', ''
-
-# @app.callback(
-#     [Output('canny_image_store', 'src'),
-#      Output('canny_image', 'src')],
-#     [Input('canny_slider', 'value'),
-#      Input('blur_image_store', 'data')] 
-# )
-# def canny_slider(value, image_data_canny):
-#     print("Canny slider callback triggered")
-#     print("Value:", value)
-#     if image_data_canny is not None:
-#         print("image data is not None")
-#         # Decode the base64 image data
-#         _, content_string = image_data_canny.split(',')
-#         decoded_image = base64.b64decode(content_string)
-
-#         # Convert the decoded image to numpy array
-#         np_image = np.frombuffer(decoded_image, dtype=np.uint8)
-#         image = cv2.imdecode(np_image, cv2.IMREAD_COLOR)
-
-#         # Apply canny
-#         canny_image = shape_detection.canny(image, value[0], value[1])
-
-#         # Encode the blurred image back to base64
-#         canny_content_bytes = cv2.imencode('.png', canny_image)[1].tobytes()
-
-#         canny_image_data = 'data:image/png;base64,' + base64.b64encode(canny_content_bytes).decode('utf-8')
-    
-
-#         return canny_image_data, canny_image_data  # You can store the blurred image in blur_image_store as well
-#     return '', ''
 
 @app.callback(
     [Output('blur_image_store', 'data'),
@@ -297,32 +212,6 @@ def process_images(blur_value, canny_value, image_data):
         return blurred_image_data, canny_image_data, bitwise_image_data
 
     return '', '',''  # Return empty data if image_data is None
-
-# @app.callback(
-#     [Output('bitwise_image_store', 'src'),
-#      Output('bitwise_image','src')], # Outputs blurred image 
-#      Input('canny_image_store', 'data'), # Fetching raw_image_store from dcc.store
-# )
-# def bitwise(image_data):
-#     if image_data is not None:
-#         # Decode the base64 image data
-#         _, content_string = image_data.split(',')
-#         decoded_image = base64.b64decode(content_string)
-
-#         # Convert the decoded image to numpy array
-#         np_image = np.frombuffer(decoded_image, dtype=np.uint8)
-#         image = cv2.imdecode(np_image, cv2.IMREAD_COLOR)
-
-#         # Apply Gaussian blur
-#         bitwise_image = shape_detection.bitwise_not(image)
-
-#         # Encode the blurred image back to base64
-#         bitwise_content_bytes = cv2.imencode('.png', bitwise_image)[1].tobytes()
-
-#         bitwise_image_data = 'data:image/png;base64,' + base64.b64encode(bitwise_content_bytes).decode('utf-8')
-
-#         return bitwise_image_data, bitwise_image_data  # You can store the blurred image in blur_image_store as well
-#     return None, None
 
 # Angle of attack checklist ###not currently in use
 # @app.callback(
