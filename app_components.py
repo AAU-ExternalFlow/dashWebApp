@@ -43,10 +43,10 @@ tabAContent = [
 tabBContent = [
     html.Div(children=[
         dcc.Markdown('''Step 1: Blur'''),
-        dcc.Slider(1, 25, 2, id='blur_slider', value=5, marks=None,tooltip={"placement": "bottom", "always_visible": True},updatemode='drag'),
+        dcc.Slider(1, 25, 2, id='blur_slider', value=1, marks=None,tooltip={"placement": "bottom", "always_visible": True},updatemode='drag'),
         html.Hr(),
         dcc.Markdown('''Step 2: Canny'''),
-        dcc.RangeSlider(1, 500, value=[1, 500],id='canny_slider', marks=None,tooltip={"placement": "bottom", "always_visible": True},updatemode='drag')
+        dcc.RangeSlider(1, 300, value=[1, 300],id='canny_slider', marks=None,tooltip={"placement": "bottom", "always_visible": True},updatemode='drag')
         # html.Label('checklistAOA:'),
         # html.Br(),
         # dcc.Checklist(
