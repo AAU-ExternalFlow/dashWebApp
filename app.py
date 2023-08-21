@@ -169,7 +169,7 @@ def upload_image(contents):
      Input('bitwise_image_store', 'data'),]
 )
 def display_storred_images(raw_image_data, blur_image_data, canny_image_data, bitwise_image_data):
-    return raw_image_data, blur_image_data, canny_image_data
+    return raw_image_data, blur_image_data, canny_image_data, bitwise_image_data
 
 # # Load button is clicked
 # @app.callback(
