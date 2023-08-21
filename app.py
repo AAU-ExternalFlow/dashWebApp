@@ -7,7 +7,7 @@ import sys
 from dash import Dash, html, dcc, dash_table, callback_context
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-import plotly.express as pu
+import plotly.express as px
 import pandas as pd
 import dash_bootstrap_components as dbc
 import pathlib
@@ -214,7 +214,7 @@ def process_images(blur_value, canny_value, image_data):
         bitwise_content_bytes = cv2.imencode('.png', bitwise_image)[1].tobytes()
         bitwise_image_data = 'data:image/png;base64,' + base64.b64encode(bitwise_content_bytes).decode('utf-8')
 
-        print(coords)
+        
         return blurred_image_data, canny_image_data, bitwise_image_data, coords
 
     return '', '', '', ''  # Return empty data if image_data is None
