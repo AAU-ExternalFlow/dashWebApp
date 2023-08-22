@@ -232,7 +232,6 @@ def generate_surface_geometry(n_clicks, bitwise_image):
     # print("Callback triggered with bitwise_image:", bitwise_image)
     if n_clicks is not None:
         print("running coords")
-        print("Shape of bitwise_image:", bitwise_image.shape)
         print("Data type of bitwise_image:", type(bitwise_image))
 
         coords = shape_detection.get_points(bitwise_image)
