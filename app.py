@@ -224,7 +224,7 @@ def process_images(blur_value, canny_value, image_data):
     Output('coords_store', 'data'),
     Output('points_plot', 'figure'),
     Input('button_surface_geometry', 'n_clicks'),
-    State('bitwise_image_data_store', 'data'),
+    State('bitwise_image_store', 'data'),
     prevent_initial_call=True
 )
 def generate_surface_geometry(n_clicks, bitwise_image):
@@ -233,8 +233,15 @@ def generate_surface_geometry(n_clicks, bitwise_image):
     if n_clicks is not None:
         print("running coords")
         print("Data type of bitwise_image:", type(bitwise_image))
+        # Decode the base64 image data
+        _, content_string = bitwise_image.split(',')
+        decoded_image = base64.b64decode(content_string)
 
-        coords = shape_detection.get_points(bitwise_image)
+        # Convert the decoded image to numpy array
+        np_image = np.frombuffer(decoded_image, dtype=np.uint8)
+        decoded_bitwise_image = cv2.imdecode(np_image, cv2.IMREAD_GRAYSCALE)
+
+        coords = shape_detection.get_points(decoded_bitwise_image)
         print("Coordinates generated:", coords)
         point_plot_data = {
         'x': coords[:, 0],
