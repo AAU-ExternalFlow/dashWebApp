@@ -244,10 +244,14 @@ def generate_surface_geometry(n_clicks, bitwise_image):
     }
 
     layout = {
-        'xaxis': {'title': 'X Axis', 'zeroline': False},
-        'yaxis': {'title': 'Y Axis', 'zeroline': False},
+        'xaxis': {'title': 'X Axis'},
+        'yaxis': {'title': 'Y Axis'},
         'hovermode': 'closest',
         'margin': {'t': 0, 'b': 100, 'l': 0, 'r': 100},  # Adjust top, bottom, left, right margins
+        'height': '275',
+        'width': 'auto',
+        'xaxis_range': [0, 1], 
+        'yaxis_range': [0, 1]  
     }
 
     return coords, {'data': [point_plot_data], 'layout': layout}
