@@ -67,6 +67,7 @@ tab1Content = dbc.Card(
     dbc.CardBody(
         [
             # html.P("This is tab 1!", className="card-text"),
+            dcc.Markdown('''Raw uploaded image'''),
             html.Img(id="raw_image", src='', style={'max-width': '100%', 'max-height': '600px', 'width': 'auto', 'height': 'auto'}),
         ]
     )
@@ -78,21 +79,22 @@ tab2Content = dbc.Card(
         [
             dbc.Row([
                 dbc.Col([
-                    dcc.Markdown('''Step 1: Blur'''),
+                    dcc.Markdown('''Step 1: Gaussian blur added to remove unwanted artifacts.'''),
                     html.Img(id="blur_image",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                     html.Br(),
-                    dcc.Markdown('''Step 3: Bitwise'''),
+                    dcc.Markdown('''Step 3: Image inversion.'''),
                     html.Img(id="bitwise_image",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto'},className="mx-auto d-block"),
                 ], width=6),
 
                 html.Hr(),
 
                 dbc.Col([
-                    dcc.Markdown('''Step 2: Canny'''),
+                    dcc.Markdown('''Step 2: Edge detection by canny edge detection.'''),
                     html.Img(id="canny_image",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                     html.Br(),
-                    dcc.Markdown('''Step 4: Omdan koordinater til 3D geometri'''),
-                    html.Img(src=b64_image(image_path1),style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto'},className="mx-auto d-block"),
+                    dcc.Markdown('''Step 4: Surface coordinates detection.'''),
+                    dcc.Graph(id="points_plot")
+                    # html.Img(src=b64_image(image_path1),style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto'},className="mx-auto d-block"),
                 ], width=6)
             ]),
         ]
@@ -103,7 +105,7 @@ tab3Content = dbc.Card(
     dbc.CardBody(
         [
             html.P("This is tab 3!", className="card-text"),
-            dcc.Graph(id="points_plot")
+            
         ]
     )
 )
