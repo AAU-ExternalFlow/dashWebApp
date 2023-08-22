@@ -176,8 +176,7 @@ def display_storred_images(raw_image_data, blur_image_data, canny_image_data, bi
 @app.callback(
     [Output('blur_image_store', 'data'),
      Output('canny_image_store', 'data'),
-     Output('bitwise_image_store', 'data'),
-     Output('bitwise_image_data_store', 'data')],
+     Output('bitwise_image_store', 'data')],
     [Input('blur_slider', 'value'),
      Input('canny_slider', 'value'),
      Input('raw_image_store', 'data')]
