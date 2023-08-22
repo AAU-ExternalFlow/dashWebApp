@@ -103,6 +103,7 @@ tab3Content = dbc.Card(
     dbc.CardBody(
         [
             html.P("This is tab 3!", className="card-text"),
+            dcc.graph(id="points_plot")
         ]
     )
 )
