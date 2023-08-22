@@ -200,9 +200,6 @@ def process_images(blur_value, canny_value, image_data):
         # Apply bitwise
         bitwise_image = shape_detection.bitwise_not(canny_image)
 
-        # # Get points from bitwise image
-        # coords = shape_detection.get_points(bitwise_image)
-
         # Encode the images back to base64
         blurred_content_bytes = cv2.imencode('.png', blurred_image)[1].tobytes()
         blurred_image_data = 'data:image/png;base64,' + base64.b64encode(blurred_content_bytes).decode('utf-8')
@@ -247,9 +244,10 @@ def generate_surface_geometry(n_clicks, bitwise_image):
     }
 
     layout = {
-        'xaxis': {'title': 'X Axis'},
-        'yaxis': {'title': 'Y Axis'},
-        'hovermode': 'closest'
+        'xaxis': {'title': 'X Axis', 'zeroline': False},
+        'yaxis': {'title': 'Y Axis', 'zeroline': False},
+        'hovermode': 'closest',
+        # 'margin': {'t': 10, 'b': 50, 'l': 50, 'r': 10},  # Adjust top, bottom, left, right margins
     }
 
     return coords, {'data': [point_plot_data], 'layout': layout}
