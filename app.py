@@ -247,7 +247,7 @@ def generate_surface_geometry(n_clicks, bitwise_image):
         'xaxis': {'title': 'X Axis'},
         'yaxis': {'title': 'Y Axis'},
         'hovermode': 'closest',
-        'margin': {'t': 0, 'b': 75, 'l': 50, 'r': 100},  # Adjust top, bottom, left, right margins
+        'margin': {'t': 0, 'b': 75, 'l': 50, 'r': 0},  # Adjust top, bottom, left, right margins
         'height': '275',
         'width': '655',
         # 'max-width': '100%',
