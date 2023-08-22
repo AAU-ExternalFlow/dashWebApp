@@ -246,31 +246,6 @@ def generate_surface_geometry(n_clicks, bitwise_image):
     return {'data': [point_plot_data], 'layout': layout}
 
 
-@app.callback(
-    Output('scatter-plot', 'figure'),
-    Input('generate-button', 'n_clicks')
-)
-def generate_points_and_scatter_plot(n_clicks):
-    # Generate the NumPy array with random points
-    np.random.seed(42)
-    num_points = 50
-    data = np.random.rand(num_points, 2)  # 50 points with 2 features each
-
-    # Create scatter plot
-    scatter_data = {
-        'x': data[:, 0],
-        'y': data[:, 1],
-        'mode': 'markers',
-        'type': 'scatter'
-    }
-
-    layout = {
-        'xaxis': {'title': 'X Axis'},
-        'yaxis': {'title': 'Y Axis'},
-        'hovermode': 'closest'
-    }
-
-    return {'data': [scatter_data], 'layout': layout}
 # Angle of attack checklist ###not currently in use
 # @app.callback(
 #     Output('output-message', 'children'),
