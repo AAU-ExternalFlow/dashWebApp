@@ -221,10 +221,10 @@ def process_images(blur_value, canny_value, image_data):
     return '', '', '', ''  # Return empty data if image_data is None
 
 @app.callback(
-    [Output('coords_store', 'data'),
-     Output('points_plot', 'figure')]
-    [Input('button_surface_geometry', 'n_clicks'),
-     Input('bitwise_image_data_store', 'data')]
+    Output('coords_store', 'data'),
+    Output('points_plot', 'figure'),
+    Input('button_surface_geometry', 'n_clicks'),
+    Input('bitwise_image_data_store', 'data'),
 )
 def generate_surface_geometry(n_clicks, bitwise_image):
     if n_clicks is not None:
