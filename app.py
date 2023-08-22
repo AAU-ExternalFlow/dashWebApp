@@ -247,7 +247,7 @@ def generate_surface_geometry(n_clicks, bitwise_image):
         'xaxis': {'title': 'X Axis', 'zeroline': False},
         'yaxis': {'title': 'Y Axis', 'zeroline': False},
         'hovermode': 'closest',
-        'margin': {'t': -50, 'b': 50, 'l': 50, 'r': 10},  # Adjust top, bottom, left, right margins
+        'margin': {'t': 0, 'b': 500, 'l': 50, 'r': 10},  # Adjust top, bottom, left, right margins
     }
 
     return coords, {'data': [point_plot_data], 'layout': layout}
