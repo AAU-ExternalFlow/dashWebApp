@@ -229,7 +229,7 @@ def process_images(blur_value, canny_value, image_data):
 )
 def generate_surface_geometry(n_clicks, bitwise_image):
     print("Callback triggered with n_clicks:", n_clicks)
-    print("Callback triggered with bitwise_image:", bitwise_image)
+    # print("Callback triggered with bitwise_image:", bitwise_image)
     if n_clicks is not None:
         coords = shape_detection.get_points(bitwise_image)
         print("Coordinates generated:", coords)
