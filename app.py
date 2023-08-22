@@ -63,6 +63,7 @@ app.layout = html.Div([
     dcc.Store(id='blur_image_store'),  # Add a dcc.Store component
     dcc.Store(id='canny_image_store'),  # Add a dcc.Store component
     dcc.Store(id='bitwise_image_store'),  # Add a dcc.Store component
+    dcc.Store(id='bitwise_image_data_store'),
     dcc.Store(id='coords_store'),
 
     dbc.Card(
@@ -177,7 +178,7 @@ def display_storred_images(raw_image_data, blur_image_data, canny_image_data, bi
     [Output('blur_image_store', 'data'),
      Output('canny_image_store', 'data'),
      Output('bitwise_image_store', 'data'),
-     Output('coords_store', 'data')],
+     Output('bitwise_image_data_store', 'data')],
     [Input('blur_slider', 'value'),
      Input('canny_slider', 'value'),
      Input('raw_image_store', 'data')]
@@ -201,8 +202,8 @@ def process_images(blur_value, canny_value, image_data):
         # Apply bitwise
         bitwise_image = shape_detection.bitwise_not(canny_image)
 
-        # Get points from bitwise image
-        coords = shape_detection.get_points(bitwise_image)
+        # # Get points from bitwise image
+        # coords = shape_detection.get_points(bitwise_image)
 
         # Encode the images back to base64
         blurred_content_bytes = cv2.imencode('.png', blurred_image)[1].tobytes()
@@ -215,10 +216,61 @@ def process_images(blur_value, canny_value, image_data):
         bitwise_image_data = 'data:image/png;base64,' + base64.b64encode(bitwise_content_bytes).decode('utf-8')
 
         
-        return blurred_image_data, canny_image_data, bitwise_image_data, coords
+        return blurred_image_data, canny_image_data, bitwise_image_data, bitwise_image
 
     return '', '', '', ''  # Return empty data if image_data is None
 
+@app.callback(
+    [Output('coords_store', 'data'),
+     Output('points_plot', 'figure')]
+    [Input('button_surface_geometry', 'n_clicks'),
+     Input('bitwise_image_data_store', 'data')]
+)
+def generate_surface_geometry(n_clicks, bitwise_image):
+    if n_clicks is not None:
+        coords = shape_detection.get_points(bitwise_image)
+
+        point_plot_data = {
+        'x': coords[:, 0],
+        'y': coords[:, 1],
+        'mode': 'markers',
+        'type': 'scatter'
+    }
+
+    layout = {
+        'xaxis': {'title': 'X Axis'},
+        'yaxis': {'title': 'Y Axis'},
+        'hovermode': 'closest'
+    }
+
+    return {'data': [point_plot_data], 'layout': layout}
+
+
+@app.callback(
+    Output('scatter-plot', 'figure'),
+    Input('generate-button', 'n_clicks')
+)
+def generate_points_and_scatter_plot(n_clicks):
+    # Generate the NumPy array with random points
+    np.random.seed(42)
+    num_points = 50
+    data = np.random.rand(num_points, 2)  # 50 points with 2 features each
+
+    # Create scatter plot
+    scatter_data = {
+        'x': data[:, 0],
+        'y': data[:, 1],
+        'mode': 'markers',
+        'type': 'scatter'
+    }
+
+    layout = {
+        'xaxis': {'title': 'X Axis'},
+        'yaxis': {'title': 'Y Axis'},
+        'hovermode': 'closest'
+    }
+
+    return {'data': [scatter_data], 'layout': layout}
 # Angle of attack checklist ###not currently in use
 # @app.callback(
 #     Output('output-message', 'children'),
