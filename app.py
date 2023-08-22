@@ -63,7 +63,6 @@ app.layout = html.Div([
     dcc.Store(id='blur_image_store'),  # Add a dcc.Store component
     dcc.Store(id='canny_image_store'),  # Add a dcc.Store component
     dcc.Store(id='bitwise_image_store'),  # Add a dcc.Store component
-    dcc.Store(id='bitwise_image_data_store'),
     dcc.Store(id='coords_store'),
 
     dbc.Card(
@@ -216,9 +215,9 @@ def process_images(blur_value, canny_value, image_data):
         bitwise_image_data = 'data:image/png;base64,' + base64.b64encode(bitwise_content_bytes).decode('utf-8')
 
         
-        return blurred_image_data, canny_image_data, bitwise_image_data, bitwise_image
+        return blurred_image_data, canny_image_data, bitwise_image_data
 
-    return '', '', '', ''  # Return empty data if image_data is None
+    return '', '', '' # Return empty data if image_data is None
 
 @app.callback(
     Output('coords_store', 'data'),
@@ -228,11 +227,7 @@ def process_images(blur_value, canny_value, image_data):
     prevent_initial_call=True
 )
 def generate_surface_geometry(n_clicks, bitwise_image):
-    print("Callback triggered with n_clicks:", n_clicks)
-    # print("Callback triggered with bitwise_image:", bitwise_image)
     if n_clicks is not None:
-        print("running coords")
-        print("Data type of bitwise_image:", type(bitwise_image))
         # Decode the base64 image data
         _, content_string = bitwise_image.split(',')
         decoded_image = base64.b64decode(content_string)
@@ -242,12 +237,14 @@ def generate_surface_geometry(n_clicks, bitwise_image):
         decoded_bitwise_image = cv2.imdecode(np_image, cv2.IMREAD_GRAYSCALE)
 
         coords = shape_detection.get_points(decoded_bitwise_image)
-        print("Coordinates generated:", coords)
+        
         point_plot_data = {
         'x': coords[:, 0],
         'y': coords[:, 1],
-        'mode': 'markers',
-        'type': 'scatter'
+        'mode': 'markers+lines',
+        'type': 'scatter',
+        'marker': {'color': 'black'},  
+        'line': {'color': 'black', 'width':'2'}  
     }
 
     layout = {
