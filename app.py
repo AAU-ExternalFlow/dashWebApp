@@ -237,9 +237,11 @@ def generate_surface_geometry(n_clicks, bitwise_image):
 
         coords = shape_detection.get_points(decoded_bitwise_image)
         
+        rotated_coords = shape_detection.rotate_points(0, coords)
+
         point_plot_data = {
-        'x': coords[:, 0],
-        'y': coords[:, 1],
+        'x': rotated_coords[:, 0],
+        'y': rotated_coords[:, 1],
         'mode': 'markers+lines',
         'type': 'scatter',
         'marker': {'color': 'black'},  
@@ -252,7 +254,7 @@ def generate_surface_geometry(n_clicks, bitwise_image):
         'hovermode': 'closest'
     }
 
-    return coords, {'data': [point_plot_data], 'layout': layout}
+    return rotated_coords, {'data': [point_plot_data], 'layout': layout}
 
 
 
