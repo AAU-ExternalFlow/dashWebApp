@@ -243,7 +243,7 @@ def generate_surface_geometry(n_clicks, bitwise_image):
         'hovermode': 'closest'
     }
 
-    return {'data': [point_plot_data], 'layout': layout}
+    return coords, {'data': [point_plot_data], 'layout': layout}
 
 
 # Angle of attack checklist ###not currently in use
