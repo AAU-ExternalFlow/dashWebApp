@@ -217,7 +217,6 @@ def process_images(blur_value, canny_value, image_data):
 
 @app.callback(
     Output('coords_store', 'data'),
-    Output('points_plot', 'figure'),
     Input('button_surface_geometry', 'n_clicks'),
     State('bitwise_image_store', 'data'),
     prevent_initial_call=True
@@ -234,9 +233,43 @@ def generate_surface_geometry(n_clicks, bitwise_image):
 
         coords = shape_detection.get_points(decoded_bitwise_image)
 
-        point_plot_data = {
-        'x': coords[:, 0],
-        'y': coords[:, 1],
+    #     point_plot_data = {
+    #     'x': coords[:, 0],
+    #     'y': coords[:, 1],
+    #     'mode': 'markers+lines',
+    #     'type': 'scatter',
+    #     'marker': {'color': 'black'},  
+    #     'line': {'color': 'black', 'width':'2'}  
+    # }
+
+    # layout = {
+    #     'xaxis': {'title': 'X Axis', 'scaleanchor': 'y', 'scaleratio': 1},
+    #     'yaxis': {'title': 'Y Axis'},
+    #     'hovermode': 'closest',
+    #     'margin': {'t': 0, 'b': 75, 'l': 50, 'r': 0},  # Adjust top, bottom, left, right margins
+    #     'height': '275',
+    #     'width': '535',
+    #     # 'max-width': '100%',
+    #     'xaxis_range': [0, 1], 
+    #     'yaxis_range': [0, 1]  
+    # }
+
+    return coords#, {'data': [point_plot_data], 'layout': layout}
+
+@app.callback(
+    Output('rotated_coords_store', 'data'),
+    Output('points_plot', 'figure'),
+    Input('coords', 'data'),
+    Input('rotate_coords_slider', 'value'),
+    prevent_initial_call=True
+)
+def generate_surface_geometry(coords, value):
+
+    rotated_coords = shape_detection.rotate_points(value, coords)
+
+    point_plot_data = {
+        'x': rotated_coords[:, 0],
+        'y': rotated_coords[:, 1],
         'mode': 'markers+lines',
         'type': 'scatter',
         'marker': {'color': 'black'},  
@@ -255,9 +288,7 @@ def generate_surface_geometry(n_clicks, bitwise_image):
         'yaxis_range': [0, 1]  
     }
 
-    return coords, {'data': [point_plot_data], 'layout': layout}
-
-
+    return rotated_coords, {'data': [point_plot_data], 'layout': layout}
 
 # Angle of attack checklist ###not currently in use
 # @app.callback(
