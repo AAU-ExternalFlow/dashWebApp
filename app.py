@@ -1,14 +1,11 @@
 import os
-import datetime
 import base64
-import uuid
 import time
 import sys
-from dash import Dash, html, dcc, dash_table, callback_context
+from dash import Dash, html, dcc, dash_table, callback_context, callback, exceptions, no_update
 from dash.dependencies import Input, Output, State
-from dash.exceptions import PreventUpdate
-import plotly.express as px
-import pandas as pd
+import plotly.graph_objects as go
+from stl import mesh
 import dash_bootstrap_components as dbc
 import pathlib
 import numpy as np
@@ -64,6 +61,8 @@ app.layout = html.Div([
     dcc.Store(id='canny_image_store'),  # Add a dcc.Store component
     dcc.Store(id='bitwise_image_store'),  # Add a dcc.Store component
     dcc.Store(id='coords_store'),
+    dcc.Store(id='rotated_coords_store'),
+    dcc.Store(id='STL'),
 
     dbc.Card(
         dbc.CardBody([
@@ -99,7 +98,9 @@ app.layout = html.Div([
                         html.Hr(),
                         dbc.Button("Generate surface geometry", id="button_surface_geometry"),
                         html.Hr(),
-                        dbc.Button("Generate mesh", id="button_mesh"),
+                        dbc.Button("Flip points horizontally", id="button_flip"),
+                        html.Hr(),
+                        dbc.Button("Generate 3D geometry", id="button_3D"),
                         html.Hr(),
                         dbc.Button("Run initial flow simulation", id="button_initial_flow_simulation"),
                 ]),
@@ -216,7 +217,7 @@ def process_images(blur_value, canny_value, image_data):
     return '', '', '' # Return empty data if image_data is None
 
 @app.callback(
-    Output('coords_store', 'data'),
+    Output('coords_store', 'data'),  
     Input('button_surface_geometry', 'n_clicks'),
     State('bitwise_image_store', 'data'),
     prevent_initial_call=True
@@ -233,41 +234,35 @@ def generate_surface_geometry(n_clicks, bitwise_image):
 
         coords = shape_detection.get_points(decoded_bitwise_image)
 
-    #     point_plot_data = {
-    #     'x': coords[:, 0],
-    #     'y': coords[:, 1],
-    #     'mode': 'markers+lines',
-    #     'type': 'scatter',
-    #     'marker': {'color': 'black'},  
-    #     'line': {'color': 'black', 'width':'2'}  
-    # }
+        
 
-    # layout = {
-    #     'xaxis': {'title': 'X Axis', 'scaleanchor': 'y', 'scaleratio': 1},
-    #     'yaxis': {'title': 'Y Axis'},
-    #     'hovermode': 'closest',
-    #     'margin': {'t': 0, 'b': 75, 'l': 50, 'r': 0},  # Adjust top, bottom, left, right margins
-    #     'height': '275',
-    #     'width': '535',
-    #     # 'max-width': '100%',
-    #     'xaxis_range': [0, 1], 
-    #     'yaxis_range': [0, 1]  
-    # }
+    return coords
 
-    return coords#, {'data': [point_plot_data], 'layout': layout}
 
 @app.callback(
     Output('rotated_coords_store', 'data'),
     Output('points_plot', 'figure'),
-    Input('coords', 'data'),
+    Input('coords_store', 'data'),
     Input('rotate_coords_slider', 'value'),
+    Input('button_flip', 'n_clicks'),
+    State('rotated_coords_store', 'data'),
     prevent_initial_call=True
 )
-def generate_surface_geometry(coords, value):
+def update_rotated_coords(coords, rotate_value, n_clicks, rotated_coords):
+    ctx = callback_context
 
-    rotated_coords = shape_detection.rotate_points(value, coords)
+    if not ctx.triggered:
+        raise exceptions.PreventUpdate
 
-    point_plot_data = {
+    triggered_id = ctx.triggered[0]['prop_id']
+
+    if 'coords_store' in triggered_id or 'rotate_coords_slider' in triggered_id:
+        rotated_coords = shape_detection.rotate_points(rotate_value, coords)
+    elif 'button_flip' in triggered_id:
+        if n_clicks is not None:
+            rotated_coords = shape_detection.flip_coords(rotated_coords)
+
+    rotated_point_plot_data = {
         'x': rotated_coords[:, 0],
         'y': rotated_coords[:, 1],
         'mode': 'markers+lines',
@@ -283,12 +278,109 @@ def generate_surface_geometry(coords, value):
         'margin': {'t': 0, 'b': 75, 'l': 50, 'r': 0},  # Adjust top, bottom, left, right margins
         'height': '275',
         'width': '535',
-        # 'max-width': '100%',
         'xaxis_range': [0, 1], 
         'yaxis_range': [0, 1]  
     }
 
-    return rotated_coords, {'data': [point_plot_data], 'layout': layout}
+    return rotated_coords, {'data': [rotated_point_plot_data], 'layout': layout}
+
+
+
+
+def stl2mesh3d(stl_mesh):
+    p, q, r = stl_mesh.vectors.shape
+    vertices, ixr = np.unique(stl_mesh.vectors.reshape(p*q, r), return_inverse=True, axis=0)
+    I = np.take(ixr, [3*k for k in range(p)])
+    J = np.take(ixr, [3*k+1 for k in range(p)])
+    K = np.take(ixr, [3*k+2 for k in range(p)])
+    return vertices, I, J, K
+
+
+@app.callback(
+    Output('stl_graph', 'figure'),
+    Input('button_3D', 'n_clicks'),
+    State('rotated_coords_store', 'data'),
+    prevent_initial_call=True
+)
+def load_stl(n_clicks, rotated_coords):
+    if n_clicks is not None:
+        STL = shape_detection.generate_STL(rotated_coords)
+        STL.save(os.path.join(os.getcwd(), 'object.stl'))  # Save the mesh to the specified path
+        
+    time.sleep(0.7)
+    # Load the STL file (replace 'AT&T-Building.stl' with your actual file)
+    my_mesh = mesh.Mesh.from_file('object.stl')
+    vertices, I, J, K = stl2mesh3d(my_mesh)
+    x, y, z = vertices.T
+    
+    colorscale = [[0, '#787878'], [1, '#787878']]
+    
+    mesh3D = go.Mesh3d(
+        x=z,
+        y=x,
+        z=y,
+        i=I,
+        j=J,
+        k=K,
+        flatshading=True,
+        colorscale=colorscale,
+        intensity=z,
+        name='STL Model',
+        showscale=False
+    )
+    
+    title = "3D Visualization of airfoil"
+    layout = go.Layout(
+        paper_bgcolor='rgb(255,255,255)',
+        title_text=title,
+        title_x=0.5,
+        font_color='black',
+        width=1000,
+        height=550,
+        scene_camera=dict(eye=dict(x=-1.5, y=1.25, z=0.5)),
+        scene_xaxis_visible=False,
+        scene_yaxis_visible=False,
+        scene_zaxis_visible=False
+        
+    )
+    
+    fig = go.Figure(data=[mesh3D], layout=layout)
+    fig.data[0].update(lighting=dict(
+        ambient=0.18,
+        diffuse=0.8,
+        fresnel=.1,
+        specular=1,
+        roughness=.1,
+        facenormalsepsilon=0
+    ))
+    fig.data[0].update(lightposition=dict(x=3000, y=3000, z=10000))
+    fig.update_layout(scene_aspectmode='data')
+
+    
+    return fig
+
+
+# @app.callback(
+#     Output('stl-viewer', 'figure'),
+#     Input('button_3D', 'n_clicks')
+# )
+# def load_stl(n_clicks):
+#     if n_clicks is None:
+#         return Dash.no_update
+    
+#     # Load the STL file (replace 'your_mesh.stl' with your actual file)
+#     mesh = p3.STLLoader('your_mesh.stl').load_sync()
+
+#     # Create a scene with the loaded mesh
+#     camera = p3.PerspectiveCamera(position=[10, 10, 10], fov=30)
+#     scene = p3.Scene(children=[mesh, camera])
+
+#     # Create a renderer and display the scene
+#     renderer = p3.Renderer(camera=camera, scene=scene, controls=[p3.OrbitControls(controlling=camera)])
+
+#     # Convert the renderer to a JSON-compatible format
+#     figure = p3.Figure(renderer=renderer, width=600, height=400)
+#     return figure
 
 # Angle of attack checklist ###not currently in use
 # @app.callback(
