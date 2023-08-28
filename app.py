@@ -1,18 +1,18 @@
 import os
-import datetime
 import base64
-import uuid
 import time
 import sys
-from dash import Dash, html, dcc, dash_table, callback_context
+from dash import Dash, html, dcc, dash_table, callback_context, callback, exceptions, no_update
 from dash.dependencies import Input, Output, State
-from dash.exceptions import PreventUpdate
-import plotly.express as px
-import pandas as pd
+import plotly.graph_objects as go
+from stl import mesh
 import dash_bootstrap_components as dbc
 import pathlib
 import numpy as np
 import cv2
+import ast
+import shutil
+import _thread
 from app_components import *
 
 
@@ -64,6 +64,10 @@ app.layout = html.Div([
     dcc.Store(id='canny_image_store'),  # Add a dcc.Store component
     dcc.Store(id='bitwise_image_store'),  # Add a dcc.Store component
     dcc.Store(id='coords_store'),
+    dcc.Store(id='rotated_coords_store'),
+    dcc.Store(id='STL'),
+    dcc.Store(id='aoa_store'),
+    dcc.Store(id='test_store'),
 
     dbc.Card(
         dbc.CardBody([
@@ -99,9 +103,23 @@ app.layout = html.Div([
                         html.Hr(),
                         dbc.Button("Generate surface geometry", id="button_surface_geometry"),
                         html.Hr(),
-                        dbc.Button("Generate mesh", id="button_mesh"),
+                        dbc.Button("Flip points horizontally", id="button_flip"),
                         html.Hr(),
-                        dbc.Button("Run initial flow simulation", id="button_initial_flow_simulation"),
+                        dbc.Button("Generate 3D geometry", id="button_3D"),
+                        html.Hr(),
+                        dbc.Row([
+                            dbc.Col([
+                                dcc.Markdown('''Angles of attack inputs:'''),
+                                dcc.Input(id="aoa_min", type="number", placeholder="AOA minimum",style={'max-width': '100%'}),
+                                dcc.Input(id="aoa_max", type="number", placeholder="AOA maximum",style={'max-width': '100%'}),
+                                dcc.Input(id="aoa_interval", type="number", placeholder="AOA interval",style={'max-width': '100%'}),
+                                ], width=6),
+                                dbc.Col([
+                                dcc.Markdown('''Angles of attack to be simulated:'''),
+                                html.Div(id='aoa_array'),
+                                ], width=6),
+                            ]),
+                        dbc.Button("Run initial flow simulation", id="button_simulation"),
                 ]),
 
                     html.Div(id='hidden-output', style={'display': 'none'}),
@@ -216,7 +234,7 @@ def process_images(blur_value, canny_value, image_data):
     return '', '', '' # Return empty data if image_data is None
 
 @app.callback(
-    Output('coords_store', 'data'),
+    Output('coords_store', 'data'),  
     Input('button_surface_geometry', 'n_clicks'),
     State('bitwise_image_store', 'data'),
     prevent_initial_call=True
@@ -233,41 +251,35 @@ def generate_surface_geometry(n_clicks, bitwise_image):
 
         coords = shape_detection.get_points(decoded_bitwise_image)
 
-    #     point_plot_data = {
-    #     'x': coords[:, 0],
-    #     'y': coords[:, 1],
-    #     'mode': 'markers+lines',
-    #     'type': 'scatter',
-    #     'marker': {'color': 'black'},  
-    #     'line': {'color': 'black', 'width':'2'}  
-    # }
+        
 
-    # layout = {
-    #     'xaxis': {'title': 'X Axis', 'scaleanchor': 'y', 'scaleratio': 1},
-    #     'yaxis': {'title': 'Y Axis'},
-    #     'hovermode': 'closest',
-    #     'margin': {'t': 0, 'b': 75, 'l': 50, 'r': 0},  # Adjust top, bottom, left, right margins
-    #     'height': '275',
-    #     'width': '535',
-    #     # 'max-width': '100%',
-    #     'xaxis_range': [0, 1], 
-    #     'yaxis_range': [0, 1]  
-    # }
+    return coords
 
-    return coords#, {'data': [point_plot_data], 'layout': layout}
 
 @app.callback(
     Output('rotated_coords_store', 'data'),
     Output('points_plot', 'figure'),
-    Input('coords', 'data'),
+    Input('coords_store', 'data'),
     Input('rotate_coords_slider', 'value'),
+    Input('button_flip', 'n_clicks'),
+    State('rotated_coords_store', 'data'),
     prevent_initial_call=True
 )
-def generate_surface_geometry(coords, value):
+def update_rotated_coords(coords, rotate_value, n_clicks, rotated_coords):
+    ctx = callback_context
 
-    rotated_coords = shape_detection.rotate_points(value, coords)
+    if not ctx.triggered:
+        raise exceptions.PreventUpdate
 
-    point_plot_data = {
+    triggered_id = ctx.triggered[0]['prop_id']
+
+    if 'coords_store' in triggered_id or 'rotate_coords_slider' in triggered_id:
+        rotated_coords = shape_detection.rotate_points(rotate_value, coords)
+    elif 'button_flip' in triggered_id:
+        if n_clicks is not None:
+            rotated_coords = shape_detection.flip_coords(rotated_coords)
+    
+    rotated_point_plot_data = {
         'x': rotated_coords[:, 0],
         'y': rotated_coords[:, 1],
         'mode': 'markers+lines',
@@ -283,12 +295,154 @@ def generate_surface_geometry(coords, value):
         'margin': {'t': 0, 'b': 75, 'l': 50, 'r': 0},  # Adjust top, bottom, left, right margins
         'height': '275',
         'width': '535',
-        # 'max-width': '100%',
         'xaxis_range': [0, 1], 
         'yaxis_range': [0, 1]  
     }
 
-    return rotated_coords, {'data': [point_plot_data], 'layout': layout}
+    return rotated_coords, {'data': [rotated_point_plot_data], 'layout': layout}
+
+
+
+
+def stl2mesh3d(stl_mesh):
+    p, q, r = stl_mesh.vectors.shape
+    vertices, ixr = np.unique(stl_mesh.vectors.reshape(p*q, r), return_inverse=True, axis=0)
+    I = np.take(ixr, [3*k for k in range(p)])
+    J = np.take(ixr, [3*k+1 for k in range(p)])
+    K = np.take(ixr, [3*k+2 for k in range(p)])
+    return vertices, I, J, K
+
+
+@app.callback(
+    Output('stl_graph', 'figure'),
+    Input('button_3D', 'n_clicks'),
+    State('rotated_coords_store', 'data'),
+    prevent_initial_call=True
+)
+def load_stl(n_clicks, rotated_coords):
+    if n_clicks is not None:
+        STL = shape_detection.generate_STL(rotated_coords)
+        STL.save(os.path.join(os.getcwd(), 'object.stl'))  # Save the mesh to the specified path
+        
+    time.sleep(0.7)
+    # Load the STL file (replace 'AT&T-Building.stl' with your actual file)
+    my_mesh = mesh.Mesh.from_file('object.stl')
+    vertices, I, J, K = stl2mesh3d(my_mesh)
+    x, y, z = vertices.T
+    
+    colorscale = [[0, '#787878'], [1, '#787878']]
+    
+    mesh3D = go.Mesh3d(
+        x=z,
+        y=x,
+        z=y,
+        i=I,
+        j=J,
+        k=K,
+        flatshading=True,
+        colorscale=colorscale,
+        intensity=z,
+        name='STL Model',
+        showscale=False
+    )
+    
+    title = "3D Visualization of airfoil"
+    layout = go.Layout(
+        paper_bgcolor='rgb(255,255,255)',
+        title_text=title,
+        title_x=0.5,
+        font_color='black',
+        width=1000,
+        height=550,
+        scene_camera=dict(eye=dict(x=-1.5, y=1.25, z=0.5)),
+        scene_xaxis_visible=False,
+        scene_yaxis_visible=False,
+        scene_zaxis_visible=False
+        
+    )
+    
+    fig = go.Figure(data=[mesh3D], layout=layout)
+    fig.data[0].update(lighting=dict(
+        ambient=0.18,
+        diffuse=0.8,
+        fresnel=.1,
+        specular=1,
+        roughness=.1,
+        facenormalsepsilon=0
+    ))
+    fig.data[0].update(lightposition=dict(x=3000, y=3000, z=10000))
+    fig.update_layout(scene_aspectmode='data')
+
+    
+    return fig
+
+
+@app.callback(
+    Output('aoa_array', 'children'),
+    Output('aoa_store','data'),
+    Input('aoa_min', 'value'),
+    Input('aoa_max', 'value'),
+    Input('aoa_interval', 'value')
+)
+def generate_array(minimum, maximum, interval):
+    if minimum is None or maximum is None or interval is None:
+        return "Please provide values for all inputs."
+
+    minimum = int(round(minimum))
+    maximum = int(round(maximum))
+    interval = int(round(interval))
+
+    if minimum >= maximum:
+        return "Minimum should be less than maximum."
+
+    num_elements = (maximum - minimum) // interval + 1
+    array = np.linspace(minimum, maximum, num_elements, dtype=int)
+    array_string = "[" + ", ".join(map(str, array)) + "]"
+    # return str(array)
+    return str(array_string), {'data_key': 'data_value'}
+
+@app.callback(
+    Output('test_store','data'),
+    Input('button_simulation', 'n_clicks'),
+    State('aoa_array', 'children'),
+    State('rotated_coords_store', 'data'),
+)
+# def run_loop(n_clicks, array_string, coords):
+def run_loop(n_clicks, array_string, rotated_coords_data):
+    # Parse the string array into a list of integers
+    array_list = ast.literal_eval(array_string)
+
+    # Delete simulation folder if already exists.
+    if os.path.exists("simulation"):
+        shutil.rmtree("simulation")
+
+    for interval in array_list:
+        folderName = os.path.join("simulation", str(interval)).replace("\\","/")
+
+        shape_detection.generateSubFolder(folderName)
+
+        aoaCoords = shape_detection.rotate_points(interval, rotated_coords_data)
+        aoaSTL = shape_detection.generate_STL(aoaCoords)
+
+        # Save rotated aoa coordinates
+        np.savetxt(f"{folderName}/coordinates.xy", aoaCoords)
+        
+        # Save STL geometry
+        aoaSTL.save(f"{folderName}/object.stl")
+
+        # Copy templateCase
+        template_case_path = os.path.join(imageProcessing_path, 'templateCase')
+        destination = shutil.copytree(template_case_path, os.path.join(folderName, 'simulation')).replace("\\","/")
+
+        # Copy object.stl to each aoa folder
+        shutil.copy(folderName+'/'+'object.stl', destination+"/constant/triSurface/object.stl").replace("\\","/")
+
+        # Run OpenFOAM
+        _thread.start_new_thread(os.system, ('bash '+folderName+'/simulation/Allrun',))
+
+    return n_clicks
+
+
 
 # Angle of attack checklist ###not currently in use
 # @app.callback(
