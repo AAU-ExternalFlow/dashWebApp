@@ -103,8 +103,8 @@ app.layout = html.Div([
                         html.Hr(),
                         dbc.Button("Generate surface geometry", id="button_surface_geometry"),
                         html.Hr(),
-                        dbc.Button("Flip points horizontally", id="button_flip"),
-                        html.Hr(),
+                        # dbc.Button("Flip points horizontally", id="button_flip"),
+                        # html.Hr(),
                         dbc.Button("Generate 3D geometry", id="button_3D"),
                         html.Hr(),
                         dbc.Row([

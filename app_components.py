@@ -92,9 +92,10 @@ tab2Content = dbc.Card(
                     dcc.Markdown('''Step 2: Edge detection by canny edge detection.'''),
                     html.Img(id="canny_image",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                     html.Br({'margin-top': '0'}),
-                    dcc.Markdown('''Step 4: Surface coordinates detection.'''),
+                    dcc.Markdown('''Step 4: Surface coordinates detection. (The front of the airfoil should be at -1)'''),
                     dcc.Graph(id="points_plot",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto'}),
                     dcc.Slider(0, 360, 1, id='rotate_coords_slider', value=0, marks=None, tooltip={"placement": "bottom", "always_visible": True},updatemode='drag'),
+                    dbc.Button("Flip points horizontally", id="button_flip"),
                     # html.Img(src=b64_image(image_path1),style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto'},className="mx-auto d-block"),
                 ], width=6)
             ]),
@@ -105,7 +106,7 @@ tab2Content = dbc.Card(
 tab3Content = dbc.Card(
     dbc.CardBody(
         [
-            html.P("This is tab 3!", className="card-text"),
+            html.P("A 3D view of your airfoil:", className="card-text"),
             dcc.Graph(id='stl_graph'),
             
         ]
