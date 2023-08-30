@@ -440,6 +440,8 @@ def run_loop(n_clicks, array_string, rotated_coords_data):
         # Run OpenFOAM
         _thread.start_new_thread(os.system, ('bash '+folderName+'/simulation/Allrun',))
 
+        print("simulation completed")
+
     return n_clicks
 
 
