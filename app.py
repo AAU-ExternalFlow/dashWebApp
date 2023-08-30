@@ -410,6 +410,7 @@ def generate_array(minimum, maximum, interval):
     # return str(array)
     return str(array_string), {'data_key': 'data_value'}
 
+
 # Check if allrun is a running process
 def is_simulation_running(process_names):
     for proc in psutil.process_iter(['pid', 'name']):
