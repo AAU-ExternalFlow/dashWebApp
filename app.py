@@ -463,10 +463,12 @@ def run_loop(n_clicks, array_string, rotated_coords_data):
 def check_simulation_status(n_intervals):
     if n_intervals > 0:
         if is_simulation_running("Allrun"):
+            print("Running simulations...")
             return "Running simulations..."
         else:
+            print("All simulations completed")
             return "All simulations completed."
-
+    print("Waiting for simulation start...")
     return "Waiting for simulation start..."
 
 # Angle of attack checklist ###not currently in use
