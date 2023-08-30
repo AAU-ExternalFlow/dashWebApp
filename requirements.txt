@@ -5,3 +5,4 @@ pandas>=2.0.1
 dash-bootstrap-components
 pillow
 numpy-stl
+psutil

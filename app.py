@@ -12,6 +12,8 @@ import numpy as np
 import cv2
 import ast
 import shutil
+import psutil
+import subprocess
 import _thread
 from app_components import *
 
@@ -59,15 +61,16 @@ def b64_image(image_filename):
 
 server = app.server
 app.layout = html.Div([
-    dcc.Store(id='raw_image_store'),  # Add a dcc.Store component
-    dcc.Store(id='blur_image_store'),  # Add a dcc.Store component
-    dcc.Store(id='canny_image_store'),  # Add a dcc.Store component
-    dcc.Store(id='bitwise_image_store'),  # Add a dcc.Store component
+    dcc.Store(id='raw_image_store'),  
+    dcc.Store(id='blur_image_store'),  
+    dcc.Store(id='canny_image_store'),  
+    dcc.Store(id='bitwise_image_store'),  
     dcc.Store(id='coords_store'),
     dcc.Store(id='rotated_coords_store'),
     dcc.Store(id='STL'),
     dcc.Store(id='aoa_store'),
     dcc.Store(id='test_store'),
+    dcc.Interval(id='status_interval', interval=5*1000, disabled=True),  # Check OF simulation status interval 
 
     dbc.Card(
         dbc.CardBody([
@@ -401,6 +404,14 @@ def generate_array(minimum, maximum, interval):
     # return str(array)
     return str(array_string), {'data_key': 'data_value'}
 
+# Check if allrun is a running process
+def is_simulation_running(process_name):
+    for proc in psutil.process_iter(['pid', 'name']):
+        if process_name in proc.info['name']:
+            return True
+    return False
+
+# Run OF callback
 @app.callback(
     Output('test_store','data'),
     Input('button_simulation', 'n_clicks'),
@@ -444,7 +455,19 @@ def run_loop(n_clicks, array_string, rotated_coords_data):
 
     return n_clicks
 
+# Check if OF simulation is still running. 
+@app.callback(
+    Output('status_text', 'children'),
+    Input('status_interval', 'n_intervals'),
+)
+def check_simulation_status(n_intervals):
+    if n_intervals > 0:
+        if is_simulation_running("Allrun"):
+            return "Running simulations..."
+        else:
+            return "All simulations completed."
 
+    return "Waiting for simulation start..."
 
 # Angle of attack checklist ###not currently in use
 # @app.callback(
