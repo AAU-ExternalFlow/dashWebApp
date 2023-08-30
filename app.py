@@ -70,7 +70,11 @@ app.layout = html.Div([
     dcc.Store(id='STL'),
     dcc.Store(id='aoa_store'),
     dcc.Store(id='test_store'),
-    dcc.Interval(id='status_interval', interval=5*1000, disabled=False),  # Check OF simulation status interval 
+    dcc.Interval(
+            id='status_interval',
+            interval=5*1000, # in milliseconds
+            n_intervals=0
+        ),  # Check OF simulation status interval 
 
     dbc.Card(
         dbc.CardBody([
@@ -93,6 +97,7 @@ app.layout = html.Div([
                             tabAContent,
                         ),
                         html.Hr(),
+                        html.Div(id="status_text"),
                         dbc.Button("Shape detection", id="button_shape_detection"),
                         dbc.Collapse(
                             dbc.Card(
@@ -461,6 +466,7 @@ def run_loop(n_clicks, array_string, rotated_coords_data):
     Input('status_interval', 'n_intervals'),
 )
 def check_simulation_status(n_intervals):
+    print("callback triggered")
     if n_intervals > 0:
         if is_simulation_running("Allrun"):
             print("Running simulations...")
