@@ -410,18 +410,13 @@ def generate_array(minimum, maximum, interval):
     # return str(array)
     return str(array_string), {'data_key': 'data_value'}
 
-# # Check if allrun is a running process
-# def is_simulation_running(process_name):
-#     for proc in psutil.process_iter(['pid', 'name']):
-#         if process_name in proc.info['name']:
-#             return True
-#     return False
-def is_simulation_running(process_name):
-    # Run the ps command within the container
-    ps_output = subprocess.run(["ps", "aux"], stdout=subprocess.PIPE, text=True).stdout
+# Check if allrun is a running process
+def is_simulation_running(process_names):
+    for proc in psutil.process_iter(['pid', 'name']):
+        if any(name in proc.info['name'] for name in process_names):
+            return True
+    return False
 
-    # Check if the process name is in the ps output
-    return process_name in ps_output
 
 # Run OF callback
 @app.callback(
@@ -483,7 +478,7 @@ def toggle_interval(n_clicks):
 def check_simulation_status(n_intervals):
     print(is_simulation_running("bash"))
     if n_intervals > 0:
-        if is_simulation_running("Allrun"):
+        if is_simulation_running("Allrun","blockMesh", "snappeHexMesh", "extrudeMesh", "simpleFoam"):
             return "Running simulations..."
         else:
             return "All simulations completed."
