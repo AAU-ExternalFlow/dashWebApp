@@ -459,7 +459,6 @@ def run_loop(n_clicks, array_string, rotated_coords_data):
         # Run OpenFOAM
         _thread.start_new_thread(os.system, ('bash '+folderName+'/simulation/Allrun',))
 
-        print("simulation completed")
 
     return n_clicks
 
@@ -477,9 +476,8 @@ def toggle_interval(n_clicks):
     Input('status_interval', 'n_intervals'),
 )
 def check_simulation_status(n_intervals):
-    print(is_simulation_running("bash"))
     if n_intervals > 0:
-        if is_simulation_running("Allrun","blockMesh", "snappeHexMesh", "extrudeMesh", "simpleFoam"):
+        if is_simulation_running("Allrun", "blockMesh", "snappyHexMesh", "extrudeMesh", "simpleFoam"):
             return "Running simulations..."
         else:
             return "All simulations completed."
