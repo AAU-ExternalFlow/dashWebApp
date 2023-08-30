@@ -98,7 +98,6 @@ app.layout = html.Div([
                             tabAContent,
                         ),
                         html.Hr(),
-                        html.Div(id="status_text"),
                         dbc.Button("Shape detection", id="button_shape_detection"),
                         dbc.Collapse(
                             dbc.Card(
@@ -129,6 +128,7 @@ app.layout = html.Div([
                                 ], width=6),
                             ]),
                         dbc.Button("Run initial flow simulation", id="button_simulation"),
+                        html.Div(id="status_text"),
                 ]),
 
                     html.Div(id='hidden-output', style={'display': 'none'}),
@@ -480,6 +480,7 @@ def check_simulation_status(n_intervals):
         if is_simulation_running("Allrun", "blockMesh", "snappyHexMesh", "extrudeMesh", "simpleFoam"):
             return "Running simulations..."
         else:
+
             return "All simulations completed."
     return "Waiting for simulation start..."
 
