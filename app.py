@@ -70,7 +70,7 @@ app.layout = html.Div([
     dcc.Store(id='STL'),
     dcc.Store(id='aoa_store'),
     dcc.Store(id='test_store'),
-    dcc.Interval(id='status_interval', interval=5*1000, disabled=True),  # Check OF simulation status interval 
+    dcc.Interval(id='status_interval', interval=5*1000, disabled=False),  # Check OF simulation status interval 
 
     dbc.Card(
         dbc.CardBody([
