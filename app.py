@@ -73,7 +73,8 @@ app.layout = html.Div([
     dcc.Interval(
             id='status_interval',
             interval=5*1000, # in milliseconds
-            n_intervals=0
+            n_intervals=0,
+            disabled=True
         ),  # Check OF simulation status interval 
 
     dbc.Card(
@@ -459,6 +460,14 @@ def run_loop(n_clicks, array_string, rotated_coords_data):
         print("simulation completed")
 
     return n_clicks
+
+# Active status_interval
+@app.callback(
+    Output('status_interval', 'disabled'),
+    Input('button_simulation', 'n_clicks'),
+)
+def toggle_interval(n_clicks):
+    return n_clicks is None
 
 # Check if OF simulation is still running. 
 @app.callback(
