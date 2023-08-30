@@ -410,12 +410,18 @@ def generate_array(minimum, maximum, interval):
     # return str(array)
     return str(array_string), {'data_key': 'data_value'}
 
-# Check if allrun is a running process
+# # Check if allrun is a running process
+# def is_simulation_running(process_name):
+#     for proc in psutil.process_iter(['pid', 'name']):
+#         if process_name in proc.info['name']:
+#             return True
+#     return False
 def is_simulation_running(process_name):
-    for proc in psutil.process_iter(['pid', 'name']):
-        if process_name in proc.info['name']:
-            return True
-    return False
+    # Run the ps command within the container
+    ps_output = subprocess.run(["ps", "aux"], stdout=subprocess.PIPE, text=True).stdout
+
+    # Check if the process name is in the ps output
+    return process_name in ps_output
 
 # Run OF callback
 @app.callback(
@@ -475,15 +481,12 @@ def toggle_interval(n_clicks):
     Input('status_interval', 'n_intervals'),
 )
 def check_simulation_status(n_intervals):
-    print("callback triggered")
+    print(is_simulation_running("bash"))
     if n_intervals > 0:
         if is_simulation_running("Allrun"):
-            print("Running simulations...")
             return "Running simulations..."
         else:
-            print("All simulations completed")
             return "All simulations completed."
-    print("Waiting for simulation start...")
     return "Waiting for simulation start..."
 
 # Angle of attack checklist ###not currently in use
