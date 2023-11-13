@@ -70,6 +70,8 @@ app.layout = html.Div([
     dcc.Store(id='STL'),
     dcc.Store(id='aoa_store'),
     dcc.Store(id='test_store'),
+    dcc.Store(id='test_store2'),
+    dcc.Store(id='test_store3'),
     dcc.Interval(
             id='status_interval',
             interval=5*1000, # in milliseconds
@@ -83,7 +85,7 @@ app.layout = html.Div([
             dbc.Row([
                 dbc.Col([
                     dcc.Markdown("""
-                        # External Flow: Aerodynamic analyser for abritrary 2D shapes
+                        # External Flow: Aerodynamic analysis for abritrary 2D shapes
                         By [Jakob Hærvig](https://haervig.com/) and [Victor Hvass Mølbak](https://www.linkedin.com/in/victor-hvass-m%C3%B8lbak-3318aa1b6/).
                     """)
                 ], width=True)
@@ -98,7 +100,7 @@ app.layout = html.Div([
                             tabAContent,
                         ),
                         html.Hr(),
-                        dbc.Button("Shape detection", id="button_shape_detection"),
+                        dbc.Button("1. Shape detection settings", id="button_shape_detection"),
                         dbc.Collapse(
                             dbc.Card(
                                 dbc.CardBody(
@@ -108,27 +110,22 @@ app.layout = html.Div([
                             id="collapse_shape_detection",
                             is_open=False,
                         ),
+
                         html.Hr(),
-                        dbc.Button("Generate surface geometry", id="button_surface_geometry"),
+
+                        dbc.Button("2. Generate surface geometry", id="button_3D"),
                         html.Hr(),
-                        # dbc.Button("Flip points horizontally", id="button_flip"),
-                        # html.Hr(),
-                        dbc.Button("Generate 3D geometry", id="button_3D"),
-                        html.Hr(),
-                        dbc.Row([
-                            dbc.Col([
-                                dcc.Markdown('''Angles of attack inputs:'''),
-                                dcc.Input(id="aoa_min", type="number", placeholder="AOA minimum",style={'max-width': '100%'}),
-                                dcc.Input(id="aoa_max", type="number", placeholder="AOA maximum",style={'max-width': '100%'}),
-                                dcc.Input(id="aoa_interval", type="number", placeholder="AOA interval",style={'max-width': '100%'}),
-                                ], width=6),
-                                dbc.Col([
-                                dcc.Markdown('''Angles of attack to be simulated:'''),
-                                html.Div(id='aoa_array'),
-                                ], width=6),
-                            ]),
-                        dbc.Button("Run initial flow simulation", id="button_simulation"),
-                        html.Div(id="status_text"),
+                        # dbc.Button("Run initial flow simulation", id="button_simulation"),
+                        dbc.Button("3. Simulation settings", id="button_simulation_settings"),
+                        dbc.Collapse(
+                            dbc.Card(
+                                dbc.CardBody(
+                                    tabCContent,
+                                )
+                            ),
+                            id="collapse_simulation_settings",
+                            is_open=False,
+                        ),
                 ]),
 
                     html.Div(id='hidden-output', style={'display': 'none'}),
@@ -136,11 +133,9 @@ app.layout = html.Div([
 
                 dbc.Col([
                     dbc.Tabs([
-                        dbc.Tab(tab1Content, label="1. Raw image Loaded", tab_id="tab-1"),
-                        dbc.Tab(tab2Content, label="2. Shape detection", tab_id="tab-2"),
-                        dbc.Tab(tab3Content, label="3. Surface geometry", tab_id="tab-3"),
-                        dbc.Tab(tab4Content, label="4. Mesh", tab_id="tab-4"),
-                        dbc.Tab(tab5Content, label="5. Initial flow simulation", tab_id="tab-5"),
+                        dbc.Tab(tab1Content, label="1. Shape detection", tab_id="tab-1"),
+                        dbc.Tab(tab2Content, label="2. Surface geometry", tab_id="tab-2"),
+                        dbc.Tab(tab3Content, label="3. Results", tab_id="tab-results"),
                     ],
                     id="tabs",
                     active_tab="tab-1",
@@ -165,6 +160,39 @@ def toggle_shape_collapse(n_clicks, is_open):
     if n_clicks:
         return not is_open
     return is_open
+
+#Callback to expand simulation settings menu.
+@app.callback(
+    Output("collapse_simulation_settings", "is_open"),
+    [Input("button_simulation_settings", "n_clicks")],
+    [State("collapse_simulation_settings", "is_open")]
+)
+def toggle_shape_collapse(n_clicks, is_open):
+    if n_clicks:
+        return not is_open
+    return is_open
+
+# #Callback to expand mesh results menu.
+# @app.callback(
+#     Output("collapse_mesh", "is_open"),
+#     [Input("button_mesh_collapse", "n_clicks")],
+#     [State("collapse_mesh", "is_open")]
+# )
+# def toggle_shape_collapse(n_clicks, is_open):
+#     if n_clicks:
+#         return not is_open
+#     return is_open
+
+# #Callback to expand fields results menu.
+# @app.callback(
+#     Output("collapse_fields", "is_open"),
+#     [Input("button_fields_collapse", "n_clicks")],
+#     [State("collapse_fields", "is_open")]
+# )
+# def toggle_shape_collapse(n_clicks, is_open):
+#     if n_clicks:
+#         return not is_open
+#     return is_open
 
 #image upload, can save locally if uncomment the commented section
 @app.callback(
@@ -244,11 +272,11 @@ def process_images(blur_value, canny_value, image_data):
 
 @app.callback(
     Output('coords_store', 'data'),  
-    Input('button_surface_geometry', 'n_clicks'),
+    Input('button_airfoil_coordinates', 'n_clicks'),
     State('bitwise_image_store', 'data'),
     prevent_initial_call=True
 )
-def generate_surface_geometry(n_clicks, bitwise_image):
+def generate_airfoil_coordinates(n_clicks, bitwise_image):
     if n_clicks is not None:
         # Decode the base64 image data
         _, content_string = bitwise_image.split(',')
@@ -269,12 +297,13 @@ def generate_surface_geometry(n_clicks, bitwise_image):
     Output('rotated_coords_store', 'data'),
     Output('points_plot', 'figure'),
     Input('coords_store', 'data'),
-    Input('rotate_coords_slider', 'value'),
-    Input('button_flip', 'n_clicks'),
+    # Input('rotate_coords_slider', 'value'),
+    Input('button_flip_hor', 'n_clicks'),
+    Input('button_flip_ver', 'n_clicks'),
     State('rotated_coords_store', 'data'),
     prevent_initial_call=True
 )
-def update_rotated_coords(coords, rotate_value, n_clicks, rotated_coords):
+def update_rotated_coords(coords, n_clicks1, n_clicks2, rotated_coords): # rotate_value, n_clicks, rotated_coords):
     ctx = callback_context
 
     if not ctx.triggered:
@@ -282,11 +311,14 @@ def update_rotated_coords(coords, rotate_value, n_clicks, rotated_coords):
 
     triggered_id = ctx.triggered[0]['prop_id']
 
-    if 'coords_store' in triggered_id or 'rotate_coords_slider' in triggered_id:
-        rotated_coords = shape_detection.rotate_points(rotate_value, coords)
-    elif 'button_flip' in triggered_id:
-        if n_clicks is not None:
-            rotated_coords = shape_detection.flip_coords(rotated_coords)
+    if 'coords_store' in triggered_id:# or 'rotate_coords_slider' in triggered_id:
+        rotated_coords = shape_detection.rotate_points(0, coords)
+    elif 'button_flip_hor' in triggered_id:
+        if n_clicks1 is not None:
+            rotated_coords = shape_detection.flip_coords_hor(rotated_coords)
+    elif 'button_flip_ver' in triggered_id:
+        if n_clicks2 is not None:
+            rotated_coords = shape_detection.flip_coords_ver(rotated_coords)
     
     rotated_point_plot_data = {
         'x': rotated_coords[:, 0],
@@ -389,6 +421,7 @@ def load_stl(n_clicks, rotated_coords):
 @app.callback(
     Output('aoa_array', 'children'),
     Output('aoa_store','data'),
+    Output('results_dropdown', 'options'),
     Input('aoa_min', 'value'),
     Input('aoa_max', 'value'),
     Input('aoa_interval', 'value')
@@ -408,10 +441,14 @@ def generate_array(minimum, maximum, interval):
     array = np.linspace(minimum, maximum, num_elements, dtype=int)
     array_string = "[" + ", ".join(map(str, array)) + "]"
     # return str(array)
-    return str(array_string), {'data_key': 'data_value'}
+
+    # Create options for the dropdown menu in tab 3 and 4
+    dropdown_options = [{'label': str(val), 'value': str(val)} for val in array]
+
+    return str(array_string), {'data_key': 'data_value'}, dropdown_options
 
 
-# Check if allrun is a running process
+# Check if process is a running
 def is_simulation_running(*process_names):
     for proc in psutil.process_iter(['pid', 'name']):
         if any(name in proc.info['name'] for name in process_names):
@@ -428,10 +465,11 @@ def is_simulation_running(*process_names):
 )
 # def run_loop(n_clicks, array_string, coords):
 def run_loop(n_clicks, array_string, rotated_coords_data):
+
     # Parse the string array into a list of integers
     array_list = ast.literal_eval(array_string)
 
-    # Delete simulation folder if already exists.
+    # Delete simulation folder if it already exists.
     if os.path.exists("simulation"):
         shutil.rmtree("simulation")
 
@@ -462,17 +500,49 @@ def run_loop(n_clicks, array_string, rotated_coords_data):
 
     return n_clicks
 
-# Active status_interval
+# # Paraview run picture scripts (Meshx.py, Px.py Ux.py)
 @app.callback(
-    Output('status_interval', 'disabled'),
-    Input('button_simulation', 'n_clicks'),
+    Output('test_store2','data'), #placeholder output
+    # Output('status_interval', 'disabled'),
+    Input('button_paraview', 'n_clicks'),
+    # State('aoa_store', 'data')
+    State('aoa_array', 'children')
 )
-def toggle_interval(n_clicks):
-    return n_clicks is None
+def run_script(n_clicks, aoa_array):
+    print(f"n_clicks: {n_clicks}")
+    print(f"aoa_array: {aoa_array}")
+    if n_clicks is not None:
+        # Split the string representation of the array and convert to integers
+        aoa_array = [int(value) for value in aoa_array[1:-1].split(', ')]
+        print(aoa_array)
+        # Create directories based on aoa_array values
+        for aoa_value in aoa_array:
+            directory_name = f"assets/{aoa_value}"
+            os.makedirs(directory_name, exist_ok=True)  # Create directory if it doesn't exist
+        shape_detection.paraviewResults(aoa_array)
+    return n_clicks
+        # return [""] * 2  # Placeholder values for the image sources
+    # else:
+        # return [""] * 2  # Placeholder values when button is not clicked
+    # return tuple([""] * 2)  # Empty strings for each image source if no button click
+
+
+
+
+
+# # Active status_interval
+# @app.callback(
+#     Output('status_interval', 'disabled'),
+#     [Output(f'resultImage_{i}', 'src') for i in range(1, 3)],
+#     Input('button_simulation', 'n_clicks'),
+# )
+# def toggle_interval(n_clicks):
+#     return n_clicks is None
 
 # Check if OF simulation is still running. 
 @app.callback(
     Output('status_text', 'children'),
+    # Output('status_interval', 'disabled'),
     Input('status_interval', 'n_intervals'),
 )
 def check_simulation_status(n_intervals):
@@ -480,28 +550,76 @@ def check_simulation_status(n_intervals):
         if is_simulation_running("Allrun", "blockMesh", "snappyHexMesh", "extrudeMesh", "simpleFoam"):
             return "Running simulations..."
         else:
+            subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh1.py'])
+            subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh2.py'])
+            subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh3.py'])
+            subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/P1.py'])
+            subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/P2.py'])
+            subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/U1.py'])
+            subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/U2.py'])
+            
 
-            return "All simulations completed."
-    return "Waiting for simulation start..."
+            image_files = ['externalFlow.jpg', 'placeholder_image.png']  # Add more image file names as needed
+            encoded_images = []
 
-# Angle of attack checklist ###not currently in use
-# @app.callback(
-#     Output('output-message', 'children'),
-#     [Input('checklistAOA', 'value')],
-#     prevent_initial_call=True
+            for i, image_file in enumerate(image_files):
+                # Read each image file and encode it as base64
+                with open(image_file, 'rb') as file:
+                    encoded_image = base64.b64encode(file.read()).decode('utf-8')
+                    encoded_images.append(f'data:image/png;base64,{encoded_image}')
+
+            # Return the base64-encoded image sources
+        return "All simulations completed.", tuple(encoded_images)  # Return as a tuple
+    return "Waiting for simulation start..."#, True
+
+# @callback(
+#     [Output(f'resultImage_{i}', 'src') for i in range(1, 8)],
+#     Input('results_dropdown', 'value')
 # )
-# def save_checklist(checkbox_values):
-#     if checkbox_values:
-#         #Save the checklist as a text file
-#         filename = 'checklist.txt'
-#         file_path = os.path.join(UPLOAD_DIR, filename)
+# def update_output(value):
+    
+#     return f'You have selected {value}'
 
-#         #Sort the checklist values in the same order as the options
-#         sorted_values = sorted(checkbox_values, key=lambda x: [option['value'] for option in checklist_options].index(x))
+@app.callback(
+    [Output(f'resultImage_{i}', 'src') for i in range(1, 8)],
+    # Output('test_store3','data'),
+    Input('refresh_results', 'n_clicks'),
+    State('results_dropdown', 'value')
+)
+def update_output(n_clicks, value):
+    if n_clicks is not None:
+        print(1)
+        value = str(value)
+        print(value)
+        image_paths = [
+                f'/assets/{value}/mesh1.png',
+                f'/assets/{value}/mesh2.png',
+                f'/assets/{value}/mesh3.png',
+                f'/assets/{value}/U1.png',
+                f'/assets/{value}/U2.png',
+                f'/assets/{value}/P1.png',
+                f'/assets/{value}/P2.png',
+            ]
+        print(image_paths[0])
+        print(image_paths[1])
+        print(image_paths[2])
+        return image_paths  # Update all 7 images
+    # Okay så det virker med at den laver billederne og dens filepaths (filepaths den her callback) men problemet
+    # lige nu er at billedet ikke vises ordentligt. html.img virker ikke godt på mesh tab. 
+    # Ved ikke om det er fordi den får image paths og ikke image src. 
 
-#         with open(file_path, 'w') as f:
-#             f.write('\n'.join(sorted_values))
+# @app.callback(
+#     Output('mesh1', 'src'),
+#     Output('mesh2', 'src'),
+#     Input('results_dropdown', 'value')
+# )
+# def update_image_src(aoa_array):
+#     print(aoa_array)
+#     # Construct the image URLs based on the selected directory
+#     URLmesh1 = f"/assets/{aoa_array}/mesh1.png"  # Modify the path and image file format as needed
+#     URLmesh2 = f"/assets/{aoa_array}/mesh2.png"  # Modify the path and image file format as needed
 
+#     return URLmesh1, URLmesh2  # Return different URLs for image1 and image2
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port="8050", debug=False)
