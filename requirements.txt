@@ -6,3 +6,5 @@ dash-bootstrap-components
 pillow
 numpy-stl
 psutil
+opencv-python 
+opencv-python-headless
