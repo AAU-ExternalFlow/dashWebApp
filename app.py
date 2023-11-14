@@ -592,13 +592,13 @@ def update_output(n_clicks, value):
         value = str(value)
         print(value)
         image_paths = [
-                f'/assets/{value}/mesh1.png',
-                f'/assets/{value}/mesh2.png',
-                f'/assets/{value}/mesh3.png',
-                f'/assets/{value}/U1.png',
-                f'/assets/{value}/U2.png',
-                f'/assets/{value}/P1.png',
-                f'/assets/{value}/P2.png',
+                f'/externalflow/assets/{value}/mesh1.png',
+                f'/externalflow/assets/{value}/mesh2.png',
+                f'/externalflow/assets/{value}/mesh3.png',
+                f'/externalflow/assets/{value}/U1.png',
+                f'/externalflow/assets/{value}/U2.png',
+                f'/externalflow/assets/{value}/P1.png',
+                f'/externalflow/assets/{value}/P2.png',
             ]
         print(image_paths[0])
         print(image_paths[1])
