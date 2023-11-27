@@ -580,30 +580,63 @@ def check_simulation_status(n_intervals):
     
 #     return f'You have selected {value}'
 
+# @app.callback(
+#     [Output(f'resultImage_{i}', 'src') for i in range(1, 8)],
+#     # Output('test_store3','data'),
+#     Input('refresh_results', 'n_clicks'),
+#     State('results_dropdown', 'value')
+# )
+# def update_output(n_clicks, value):
+#     if n_clicks is not None:
+#         print(1)
+#         value = str(value)
+#         print(value)
+#         image_paths = [
+#                 f'/externalflow/assets/{value}/mesh1.png',
+#                 f'/externalflow/assets/{value}/mesh2.png',
+#                 f'/externalflow/assets/{value}/mesh3.png',
+#                 f'/externalflow/assets/{value}/U1.png',
+#                 f'/externalflow/assets/{value}/U2.png',
+#                 f'/externalflow/assets/{value}/P1.png',
+#                 f'/externalflow/assets/{value}/P2.png',
+#             ]
+#         print(image_paths[0])
+#         print(image_paths[1])
+#         print(image_paths[2])
+#         return image_paths  
+
 @app.callback(
     [Output(f'resultImage_{i}', 'src') for i in range(1, 8)],
-    # Output('test_store3','data'),
     Input('refresh_results', 'n_clicks'),
     State('results_dropdown', 'value')
 )
 def update_output(n_clicks, value):
     if n_clicks is not None:
-        print(1)
-        value = str(value)
-        print(value)
         image_paths = [
-                f'/externalflow/assets/{value}/mesh1.png',
-                f'/externalflow/assets/{value}/mesh2.png',
-                f'/externalflow/assets/{value}/mesh3.png',
-                f'/externalflow/assets/{value}/U1.png',
-                f'/externalflow/assets/{value}/U2.png',
-                f'/externalflow/assets/{value}/P1.png',
-                f'/externalflow/assets/{value}/P2.png',
-            ]
-        print(image_paths[0])
-        print(image_paths[1])
-        print(image_paths[2])
-        return image_paths  # Update all 7 images
+            f'/externalflow/assets/{value}/mesh1.png',
+            f'/externalflow/assets/{value}/mesh2.png',
+            f'/externalflow/assets/{value}/mesh3.png',
+            f'/externalflow/assets/{value}/U1.png',
+            f'/externalflow/assets/{value}/U2.png',
+            f'/externalflow/assets/{value}/P1.png',
+            f'/externalflow/assets/{value}/P2.png',
+        ]
+
+        encoded_images = []
+        for path in image_paths:
+            if os.path.exists(path):
+                with open(path, 'rb') as image_file:
+                    encoded_image = base64.b64encode(image_file.read()).decode('ascii')
+                    encoded_images.append(f'data:image/png;base64,{encoded_image}')
+            else:
+                encoded_images.append(None)
+
+        return encoded_images
+    else:
+        # If the button hasn't been clicked yet
+        return [dash.no_update] * 7
+    
+    # Update all 7 images
     # Okay så det virker med at den laver billederne og dens filepaths (filepaths den her callback) men problemet
     # lige nu er at billedet ikke vises ordentligt. html.img virker ikke godt på mesh tab. 
     # Ved ikke om det er fordi den får image paths og ikke image src. 
