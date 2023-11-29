@@ -533,7 +533,7 @@ def run_script(n_clicks, aoa_array):
 # # Active status_interval
 # @app.callback(
 #     Output('status_interval', 'disabled'),
-#     # [Output(f'resultImage_{i}', 'src') for i in range(1, 3)],
+#     [Output(f'resultImage_{i}', 'src') for i in range(1, 3)],
 #     Input('button_simulation', 'n_clicks'),
 # )
 # def toggle_interval(n_clicks):
@@ -548,37 +548,29 @@ def run_script(n_clicks, aoa_array):
 def check_simulation_status(n_intervals):
     if n_intervals > 0:
         if is_simulation_running("Allrun", "blockMesh", "snappyHexMesh", "extrudeMesh", "simpleFoam"):
-            # Define variations of the message
-            messages = ["Running simulations.", "Running simulations..", "Running simulations..."]
-
-            # Use modulo to cycle through messages based on n_intervals
-            message_index = n_intervals % len(messages)
-            
-            # Return the current variation
-            return messages[message_index]
-            # return "Running simulations..."
-        # else:
-        #     subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh1.py'])
-        #     subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh2.py'])
-        #     subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh3.py'])
-        #     subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/P1.py'])
-        #     subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/P2.py'])
-        #     subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/U1.py'])
-        #     subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/U2.py'])
+            return "Running simulations..."
+        else:
+            subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh1.py'])
+            subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh2.py'])
+            subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh3.py'])
+            subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/P1.py'])
+            subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/P2.py'])
+            subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/U1.py'])
+            subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/U2.py'])
             
 
-        #     image_files = ['externalFlow.jpg', 'placeholder_image.png']  # Add more image file names as needed
-        #     encoded_images = []
+            image_files = ['externalFlow.jpg', 'placeholder_image.png']  # Add more image file names as needed
+            encoded_images = []
 
-        #     for i, image_file in enumerate(image_files):
-        #         # Read each image file and encode it as base64
-        #         with open(image_file, 'rb') as file:
-        #             encoded_image = base64.b64encode(file.read()).decode('utf-8')
-        #             encoded_images.append(f'data:image/png;base64,{encoded_image}')
+            for i, image_file in enumerate(image_files):
+                # Read each image file and encode it as base64
+                with open(image_file, 'rb') as file:
+                    encoded_image = base64.b64encode(file.read()).decode('utf-8')
+                    encoded_images.append(f'data:image/png;base64,{encoded_image}')
 
             # Return the base64-encoded image sources
-        return "All simulations completed."  # Return as a tuple
-    return "Waiting for simulations to start."#, True
+        return "All simulations completed.", tuple(encoded_images)  # Return as a tuple
+    return "Waiting for simulation start..."#, True
 
 # @callback(
 #     [Output(f'resultImage_{i}', 'src') for i in range(1, 8)],
@@ -614,7 +606,7 @@ def check_simulation_status(n_intervals):
 #         return image_paths  
 
 @app.callback(
-    [Output(f'resultImage_{i}', 'src') for i in range(1, 9)],
+    [Output(f'resultImage_{i}', 'src') for i in range(1, 8)],
     Input('refresh_results', 'n_clicks'),
     State('results_dropdown', 'value')
 )
@@ -624,7 +616,6 @@ def update_output(n_clicks, value):
             f'/externalflow/assets/{value}/mesh1.png',
             f'/externalflow/assets/{value}/mesh2.png',
             f'/externalflow/assets/{value}/mesh3.png',
-            f'/externalflow/assets/{value}/mesh4.png',
             f'/externalflow/assets/{value}/U1.png',
             f'/externalflow/assets/{value}/U2.png',
             f'/externalflow/assets/{value}/P1.png',
@@ -643,7 +634,7 @@ def update_output(n_clicks, value):
         return encoded_images
     else:
         # If the button hasn't been clicked yet
-        return [dash.no_update] * 8
+        return [dash.no_update] * 7
     
     # Update all 7 images
     # Okay så det virker med at den laver billederne og dens filepaths (filepaths den her callback) men problemet
