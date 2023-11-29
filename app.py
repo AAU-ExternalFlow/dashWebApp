@@ -530,14 +530,14 @@ def run_script(n_clicks, aoa_array):
 
 
 
-# Active status_interval
-@app.callback(
-    Output('status_interval', 'disabled'),
-    # [Output(f'resultImage_{i}', 'src') for i in range(1, 3)],
-    Input('button_simulation', 'n_clicks'),
-)
-def toggle_interval(n_clicks):
-    return n_clicks is None
+# # Active status_interval
+# @app.callback(
+#     Output('status_interval', 'disabled'),
+#     # [Output(f'resultImage_{i}', 'src') for i in range(1, 3)],
+#     Input('button_simulation', 'n_clicks'),
+# )
+# def toggle_interval(n_clicks):
+#     return n_clicks is None
 
 # Check if OF simulation is still running. 
 @app.callback(
