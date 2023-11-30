@@ -161,7 +161,7 @@ tab3Content = dbc.Card(
                                 html.Img(id="resultImage_2",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                                 # html.Br({'margin-top': '0'}),
                                 dcc.Markdown('''Mesh at the airfoil trailing edge'''),
-                                html.Img(id="resultImage_4",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
+                                # html.Img(id="resultImage_4",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                             ], width=6),
                         ]),
                     )
@@ -176,10 +176,10 @@ tab3Content = dbc.Card(
                         dbc.Row([
                             dbc.Col([
                                 dcc.Markdown('''Air velocity around the airfoil.'''),
-                                html.Img(id="resultImage_5",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
+                                html.Img(id="resultImage_4",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                                 # html.Br(),
                                 dcc.Markdown('''Air velocity at the airfoil leading edge'''),
-                                html.Img(id="resultImage_6",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto'},className="mx-auto d-block"),
+                                html.Img(id="resultImage_5",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto'},className="mx-auto d-block"),
                                 
                                 
                             ], width=6),
@@ -188,10 +188,10 @@ tab3Content = dbc.Card(
 
                             dbc.Col([
                                 dcc.Markdown('''Pressure around the airfoil.'''),
-                                html.Img(id="resultImage_7",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
+                                html.Img(id="resultImage_6",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                                 # html.Br({'margin-top': '0'}),
                                 dcc.Markdown('''Pressure at the airfoil leading edge'''),
-                                html.Img(id="resultImage_8",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
+                                html.Img(id="resultImage_7",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                             ], width=6),
                         ]),
                     )
