@@ -20,20 +20,20 @@ from app_components import *
 
 
 
-# Get the absolute path of the current directory
-current_directory = os.path.dirname(os.path.abspath(__file__))
+# # Get the absolute path of the current directory
+# current_directory = os.path.dirname(os.path.abspath(__file__))
 
-# Append paths of other directories to sys.path
-main_directory_path = os.path.join(current_directory, '..')  # Parent directory
-imageProcessing_path = os.path.join(current_directory, '..', 'imageProcessing')
-# third_directory_path = os.path.join(current_directory, '..', 'third_directory')
+# # Append paths of other directories to sys.path
+# main_directory_path = os.path.join(current_directory, '..')  # Parent directory
+# imageProcessing_path = os.path.join(current_directory, '..', 'imageProcessing')
+# # third_directory_path = os.path.join(current_directory, '..', 'third_directory')
 
-sys.path.append(main_directory_path)
-sys.path.append(imageProcessing_path)
-# sys.path.append(third_directory_path)
+# sys.path.append(main_directory_path)
+# sys.path.append(imageProcessing_path)
+# # sys.path.append(third_directory_path)
 
-import shape_detection
-# from third_script import your_function as third_function
+# import shape_detection
+# # from third_script import your_function as third_function
 
 
 
@@ -41,22 +41,22 @@ CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
 UPLOAD_DIR = CURRENT_DIR.parents[0] / 'uploads'
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-checklist_options = [
-    {'label': '0degrees', 'value': '0d'},
-    {'label': '5degrees', 'value': '5d'},
-    {'label': '10degrees', 'value': '10d'}
-]
+# checklist_options = [
+#     {'label': '0degrees', 'value': '0d'},
+#     {'label': '5degrees', 'value': '5d'},
+#     {'label': '10degrees', 'value': '10d'}
+# ]
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = Dash(__name__)
 
-image_path = CURRENT_DIR / 'externalFlow.jpg'
+# image_path = CURRENT_DIR / 'externalFlow.jpg'
 
-# Using base64 encoding and decoding
-def b64_image(image_filename):
-    with open(image_filename, 'rb') as f:
-        image = f.read()
-    return 'data:image/png;base64,' + base64.b64encode(image).decode('utf-8')
+# # Using base64 encoding and decoding
+# def b64_image(image_filename):
+#     with open(image_filename, 'rb') as f:
+#         image = f.read()
+#     return 'data:image/png;base64,' + base64.b64encode(image).decode('utf-8')
 
 
 
@@ -82,7 +82,6 @@ app.layout = html.Div([
 
     dbc.Card(
         dbc.CardBody([
-            # html.Br(),
             dbc.Row([
                 dbc.Col([
                     dcc.Markdown("""
@@ -131,7 +130,6 @@ app.layout = html.Div([
 
                         dbc.Button("2. Generate surface geometry", id="button_3D"),
                         html.Hr(),
-                        # dbc.Button("Run initial flow simulation", id="button_simulation"),
                         dbc.Button("3. Simulation settings", id="button_simulation_settings"),
                         dbc.Collapse(
                             dbc.Card(
@@ -160,9 +158,7 @@ app.layout = html.Div([
                     ],
                     id="tabs",
                     active_tab="tab-1",
-                    ),
-
-                    # html.Img(id="analysed-image", style={'max-width': '100%', 'max-height': '600px', 'width': 'auto', 'height': 'auto'}),       
+                    ),   
                 ], width=8),
             ], align='start'),
         ])
@@ -170,9 +166,7 @@ app.layout = html.Div([
 ])
 
 
-
 get_callbacks(app)
-
 
 
 if __name__ == "__main__":

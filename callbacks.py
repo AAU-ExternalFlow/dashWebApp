@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, dash_table, callback_context, callback, exceptions, no_update
+from dash import dash, html, dcc, dash_table, callback_context, callback, exceptions, no_update
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 from stl import mesh
