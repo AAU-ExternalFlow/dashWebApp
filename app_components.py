@@ -48,19 +48,19 @@ tabBContent = [
         html.Hr(),
         dcc.Markdown('''Step 2: Canny'''),
         dcc.RangeSlider(1, 300, value=[1, 300],id='canny_slider', marks=None,tooltip={"placement": "bottom", "always_visible": True},updatemode='drag'),
-        html.Hr(),
-        html.Center(
-            dbc.Button("Generate airfoil coordinates", id="button_airfoil_coordinates", className="mx-auto mt-3"),
-        ),
-        html.Hr(),
-        html.Center(
-            html.Div([
-                dbc.Row([
-                    dbc.Col([dbc.Button("Flip points horizontally", id="button_flip_hor", className="mx-auto col-10")]),
-                    dbc.Col([dbc.Button("Flip points vertically", id="button_flip_ver", className="mx-auto col-10")]),
-                ]),
-            ]),
-        ),
+        # html.Hr(),
+        # html.Center(
+        #     dbc.Button("Generate airfoil coordinates", id="button_airfoil_coordinates", className="mx-auto mt-3"),
+        # ),
+        # html.Hr(),
+        # html.Center(
+        #     html.Div([
+        #         dbc.Row([
+        #             dbc.Col([dbc.Button("Flip points horizontally", id="button_flip_hor", className="mx-auto col-10")]),
+        #             dbc.Col([dbc.Button("Flip points vertically", id="button_flip_ver", className="mx-auto col-10")]),
+        #         ]),
+        #     ]),
+        # ),
     ]),
 ]
 
@@ -78,16 +78,16 @@ tabCContent = [
                 html.Div(id='aoa_array'),
                 ], width=6),
             ]),
-            html.Hr(),
-            html.Center(
-                html.Div([
-                    dbc.Row([
-                        dbc.Col([dbc.Button("Run initial flow simulation", id="button_simulation", className="mx-auto col-10")]),
-                        dbc.Col([dbc.Button("Run paraview", id="button_paraview", className="mx-auto col-10")]),
-                    ]),
-                ]),
-            ),
-            html.Div(id="status_text"),
+            # html.Hr(),
+            # html.Center(
+            #     html.Div([
+            #         dbc.Row([
+            #             dbc.Col([dbc.Button("Run initial flow simulation", id="button_simulation", className="mx-auto col-10")]),
+            #             dbc.Col([dbc.Button("Run paraview", id="button_paraview", className="mx-auto col-10")]),
+            #         ]),
+            #     ]),
+            # ),
+            # html.Div(id="status_text"),
     ]),
 ]
 
@@ -112,7 +112,7 @@ tab1Content = dbc.Card(
                     dcc.Markdown('''Step 2: Edge detection by canny edge detection.'''),
                     html.Img(id="canny_image",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                     html.Br({'margin-top': '0'}),
-                    dcc.Markdown('''Step 4: Airfoil surface coordinates. The front of the airfoil should be at (0, 0)'''),
+                    dcc.Markdown('''Step 4: Airfoil surface coordinates. The front of the airfoil should be at (0, 0).'''),
                     dcc.Graph(id="points_plot",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto'}),
                     # dcc.Slider(0, 360, 1, id='rotate_coords_slider', value=0, marks=None, tooltip={"placement": "bottom", "always_visible": True},updatemode='drag'),
                     
@@ -203,14 +203,12 @@ tab3Content = dbc.Card(
     )
 )
 
-tab4Content = dbc.Card(
-    dbc.CardBody(
-        [
-            html.P("This is tab 5!", className="card-text"),
-            dcc.Dropdown(id='results_dropdown', options=[], placeholder="Chose an angle of attack",),
-            dbc.Button("Refresh", id="refresh_results"),
-            
-            
-        ]
-    )
-)
+# tab4Content = dbc.Card(
+#     dbc.CardBody(
+#         [
+#             html.P("This is tab 5!", className="card-text"),
+#             dcc.Dropdown(id='results_dropdown', options=[], placeholder="Chose an angle of attack",),
+#             dbc.Button("Refresh", id="refresh_results"),
+#         ]
+#     )
+# )
