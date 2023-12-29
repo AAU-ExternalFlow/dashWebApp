@@ -70,6 +70,8 @@ app.layout = html.Div([
     dcc.Store(id='STL'),
     dcc.Store(id='aoa_store'),
     dcc.Store(id='test_store'),
+    dcc.Store(id='test_store2'),
+    dcc.Store(id='test_store3'),
     dcc.Interval(
             id='status_interval',
             interval=5*1000, # in milliseconds
@@ -133,8 +135,7 @@ app.layout = html.Div([
                     dbc.Tabs([
                         dbc.Tab(tab1Content, label="1. Shape detection", tab_id="tab-1"),
                         dbc.Tab(tab2Content, label="2. Surface geometry", tab_id="tab-2"),
-                        dbc.Tab(tab3Content, label="3. Mesh", tab_id="tab-3"),
-                        dbc.Tab(tab4Content, label="4. Initial flow simulation", tab_id="tab-4"),
+                        dbc.Tab(tab3Content, label="3. Results", tab_id="tab-results"),
                     ],
                     id="tabs",
                     active_tab="tab-1",
@@ -170,6 +171,28 @@ def toggle_shape_collapse(n_clicks, is_open):
     if n_clicks:
         return not is_open
     return is_open
+
+# #Callback to expand mesh results menu.
+# @app.callback(
+#     Output("collapse_mesh", "is_open"),
+#     [Input("button_mesh_collapse", "n_clicks")],
+#     [State("collapse_mesh", "is_open")]
+# )
+# def toggle_shape_collapse(n_clicks, is_open):
+#     if n_clicks:
+#         return not is_open
+#     return is_open
+
+# #Callback to expand fields results menu.
+# @app.callback(
+#     Output("collapse_fields", "is_open"),
+#     [Input("button_fields_collapse", "n_clicks")],
+#     [State("collapse_fields", "is_open")]
+# )
+# def toggle_shape_collapse(n_clicks, is_open):
+#     if n_clicks:
+#         return not is_open
+#     return is_open
 
 #image upload, can save locally if uncomment the commented section
 @app.callback(
@@ -398,6 +421,7 @@ def load_stl(n_clicks, rotated_coords):
 @app.callback(
     Output('aoa_array', 'children'),
     Output('aoa_store','data'),
+    Output('results_dropdown', 'options'),
     Input('aoa_min', 'value'),
     Input('aoa_max', 'value'),
     Input('aoa_interval', 'value')
@@ -417,7 +441,11 @@ def generate_array(minimum, maximum, interval):
     array = np.linspace(minimum, maximum, num_elements, dtype=int)
     array_string = "[" + ", ".join(map(str, array)) + "]"
     # return str(array)
-    return str(array_string), {'data_key': 'data_value'}
+
+    # Create options for the dropdown menu in tab 3 and 4
+    dropdown_options = [{'label': str(val), 'value': str(val)} for val in array]
+
+    return str(array_string), {'data_key': 'data_value'}, dropdown_options
 
 
 # Check if process is a running
@@ -437,6 +465,7 @@ def is_simulation_running(*process_names):
 )
 # def run_loop(n_clicks, array_string, coords):
 def run_loop(n_clicks, array_string, rotated_coords_data):
+
     # Parse the string array into a list of integers
     array_list = ast.literal_eval(array_string)
 
@@ -471,52 +500,44 @@ def run_loop(n_clicks, array_string, rotated_coords_data):
 
     return n_clicks
 
-# Paraview run picture scripts (Meshx.py, Px.py Ux.py)
+# # Paraview run picture scripts (Meshx.py, Px.py Ux.py)
 @app.callback(
-    [Output(f'resultImage_{i}', 'src') for i in range(1, 3)],
+    Output('test_store2','data'), #placeholder output
     # Output('status_interval', 'disabled'),
     Input('button_paraview', 'n_clicks'),
+    # State('aoa_store', 'data')
+    State('aoa_array', 'children')
 )
-def run_script(n_clicks):
-    if n_clicks is not None and n_clicks > 0:
-        try:
-            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh1.py'])
-            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh2.py'])
-            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh3.py'])
-            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/P1.py'])
-            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/P2.py'])
-            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/U1.py'])
-            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/U2.py'])
-                        # Assuming you have an image file named 'your_image.png' in the same directory
-            
-
-            image_files = ['externalFlow.jpg', 'placeholder_image.png']  # Add more image file names as needed
-            encoded_images = []
-
-            for i, image_file in enumerate(image_files):
-                # Read each image file and encode it as base64
-                with open(image_file, 'rb') as file:
-                    encoded_image = base64.b64encode(file.read()).decode('utf-8')
-                    encoded_images.append(f'data:image/png;base64,{encoded_image}')
-
-            # Return the base64-encoded image sources
-            return tuple(encoded_images)  # Return as a tuple
-            # return "Paraview script ran successfully."
-        except Exception as e:
-            return tuple([f"Error executing script: {str(e)}"] * 2)  # Repeat the error message for each image
-    return tuple([""] * 2)  # Empty strings for each image source if no button click
+def run_script(n_clicks, aoa_array):
+    print(f"n_clicks: {n_clicks}")
+    print(f"aoa_array: {aoa_array}")
+    if n_clicks is not None:
+        # Split the string representation of the array and convert to integers
+        aoa_array = [int(value) for value in aoa_array[1:-1].split(', ')]
+        print(aoa_array)
+        # Create directories based on aoa_array values
+        for aoa_value in aoa_array:
+            directory_name = f"assets/{aoa_value}"
+            os.makedirs(directory_name, exist_ok=True)  # Create directory if it doesn't exist
+        shape_detection.paraviewResults(aoa_array)
+    return n_clicks
+        # return [""] * 2  # Placeholder values for the image sources
+    # else:
+        # return [""] * 2  # Placeholder values when button is not clicked
+    # return tuple([""] * 2)  # Empty strings for each image source if no button click
 
 
 
 
 
-# Active status_interval
-@app.callback(
-    Output('status_interval', 'disabled'),
-    Input('button_simulation', 'n_clicks'),
-)
-def toggle_interval(n_clicks):
-    return n_clicks is None
+# # Active status_interval
+# @app.callback(
+#     Output('status_interval', 'disabled'),
+#     [Output(f'resultImage_{i}', 'src') for i in range(1, 3)],
+#     Input('button_simulation', 'n_clicks'),
+# )
+# def toggle_interval(n_clicks):
+#     return n_clicks is None
 
 # Check if OF simulation is still running. 
 @app.callback(
@@ -529,11 +550,109 @@ def check_simulation_status(n_intervals):
         if is_simulation_running("Allrun", "blockMesh", "snappyHexMesh", "extrudeMesh", "simpleFoam"):
             return "Running simulations..."#, False
         else:
+            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh1.py'])
+            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh2.py'])
+            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh3.py'])
+            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/P1.py'])
+            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/P2.py'])
+            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/U1.py'])
+            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/U2.py'])
             
-            return "All simulations completed."#, True
+
+            # image_files = ['externalFlow.jpg', 'placeholder_image.png']  # Add more image file names as needed
+            # encoded_images = []
+
+            # for i, image_file in enumerate(image_files):
+            #     # Read each image file and encode it as base64
+            #     with open(image_file, 'rb') as file:
+            #         encoded_image = base64.b64encode(file.read()).decode('utf-8')
+            #         encoded_images.append(f'data:image/png;base64,{encoded_image}')
+
+            # Return the base64-encoded image sources
+        return "All simulations completed.", tuple(encoded_images)  # Return as a tuple
     return "Waiting for simulation start..."#, True
 
+# @callback(
+#     [Output(f'resultImage_{i}', 'src') for i in range(1, 8)],
+#     Input('results_dropdown', 'value')
+# )
+# def update_output(value):
+    
+#     return f'You have selected {value}'
 
+# @app.callback(
+#     [Output(f'resultImage_{i}', 'src') for i in range(1, 8)],
+#     # Output('test_store3','data'),
+#     Input('refresh_results', 'n_clicks'),
+#     State('results_dropdown', 'value')
+# )
+# def update_output(n_clicks, value):
+#     if n_clicks is not None:
+#         print(1)
+#         value = str(value)
+#         print(value)
+#         image_paths = [
+#                 f'/externalflow/assets/{value}/mesh1.png',
+#                 f'/externalflow/assets/{value}/mesh2.png',
+#                 f'/externalflow/assets/{value}/mesh3.png',
+#                 f'/externalflow/assets/{value}/U1.png',
+#                 f'/externalflow/assets/{value}/U2.png',
+#                 f'/externalflow/assets/{value}/P1.png',
+#                 f'/externalflow/assets/{value}/P2.png',
+#             ]
+#         print(image_paths[0])
+#         print(image_paths[1])
+#         print(image_paths[2])
+#         return image_paths  
+
+@app.callback(
+    [Output(f'resultImage_{i}', 'src') for i in range(1, 8)],
+    Input('refresh_results', 'n_clicks'),
+    State('results_dropdown', 'value')
+)
+def update_output(n_clicks, value):
+    if n_clicks is not None:
+        image_paths = [
+            f'/externalflow/assets/{value}/mesh1.png',
+            f'/externalflow/assets/{value}/mesh2.png',
+            f'/externalflow/assets/{value}/mesh3.png',
+            f'/externalflow/assets/{value}/U1.png',
+            f'/externalflow/assets/{value}/U2.png',
+            f'/externalflow/assets/{value}/P1.png',
+            f'/externalflow/assets/{value}/P2.png',
+        ]
+
+        encoded_images = []
+        for path in image_paths:
+            if os.path.exists(path):
+                with open(path, 'rb') as image_file:
+                    encoded_image = base64.b64encode(image_file.read()).decode('ascii')
+                    encoded_images.append(f'data:image/png;base64,{encoded_image}')
+            else:
+                encoded_images.append(None)
+
+        return encoded_images
+    else:
+        # If the button hasn't been clicked yet
+        return [dash.no_update] * 7
+    
+    # Update all 7 images
+    # Okay så det virker med at den laver billederne og dens filepaths (filepaths den her callback) men problemet
+    # lige nu er at billedet ikke vises ordentligt. html.img virker ikke godt på mesh tab. 
+    # Ved ikke om det er fordi den får image paths og ikke image src. 
+
+# @app.callback(
+#     Output('mesh1', 'src'),
+#     Output('mesh2', 'src'),
+#     Input('results_dropdown', 'value')
+# )
+# def update_image_src(aoa_array):
+#     print(aoa_array)
+#     # Construct the image URLs based on the selected directory
+#     URLmesh1 = f"/assets/{aoa_array}/mesh1.png"  # Modify the path and image file format as needed
+#     URLmesh2 = f"/assets/{aoa_array}/mesh2.png"  # Modify the path and image file format as needed
+
+#     return URLmesh1, URLmesh2  # Return different URLs for image1 and image2
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port="8050", debug=False)
