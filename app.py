@@ -83,7 +83,7 @@ app.layout = html.Div([
             dbc.Row([
                 dbc.Col([
                     dcc.Markdown("""
-                        # External Flow: Aerodynamic analyser for abritrary 2D shapes
+                        # External Flow: Aerodynamic analysis for abritrary 2D shapes
                         By [Jakob Hærvig](https://haervig.com/) and [Victor Hvass Mølbak](https://www.linkedin.com/in/victor-hvass-m%C3%B8lbak-3318aa1b6/).
                     """)
                 ], width=True)
@@ -98,7 +98,7 @@ app.layout = html.Div([
                             tabAContent,
                         ),
                         html.Hr(),
-                        dbc.Button("Shape detection", id="button_shape_detection"),
+                        dbc.Button("1. Shape detection settings", id="button_shape_detection"),
                         dbc.Collapse(
                             dbc.Card(
                                 dbc.CardBody(
@@ -108,27 +108,22 @@ app.layout = html.Div([
                             id="collapse_shape_detection",
                             is_open=False,
                         ),
+
                         html.Hr(),
-                        dbc.Button("Generate surface geometry", id="button_surface_geometry"),
+
+                        dbc.Button("2. Generate surface geometry", id="button_3D"),
                         html.Hr(),
-                        # dbc.Button("Flip points horizontally", id="button_flip"),
-                        # html.Hr(),
-                        dbc.Button("Generate 3D geometry", id="button_3D"),
-                        html.Hr(),
-                        dbc.Row([
-                            dbc.Col([
-                                dcc.Markdown('''Angles of attack inputs:'''),
-                                dcc.Input(id="aoa_min", type="number", placeholder="AOA minimum",style={'max-width': '100%'}),
-                                dcc.Input(id="aoa_max", type="number", placeholder="AOA maximum",style={'max-width': '100%'}),
-                                dcc.Input(id="aoa_interval", type="number", placeholder="AOA interval",style={'max-width': '100%'}),
-                                ], width=6),
-                                dbc.Col([
-                                dcc.Markdown('''Angles of attack to be simulated:'''),
-                                html.Div(id='aoa_array'),
-                                ], width=6),
-                            ]),
-                        dbc.Button("Run initial flow simulation", id="button_simulation"),
-                        html.Div(id="status_text"),
+                        # dbc.Button("Run initial flow simulation", id="button_simulation"),
+                        dbc.Button("3. Simulation settings", id="button_simulation_settings"),
+                        dbc.Collapse(
+                            dbc.Card(
+                                dbc.CardBody(
+                                    tabCContent,
+                                )
+                            ),
+                            id="collapse_simulation_settings",
+                            is_open=False,
+                        ),
                 ]),
 
                     html.Div(id='hidden-output', style={'display': 'none'}),
@@ -136,11 +131,10 @@ app.layout = html.Div([
 
                 dbc.Col([
                     dbc.Tabs([
-                        dbc.Tab(tab1Content, label="1. Raw image Loaded", tab_id="tab-1"),
-                        dbc.Tab(tab2Content, label="2. Shape detection", tab_id="tab-2"),
-                        dbc.Tab(tab3Content, label="3. Surface geometry", tab_id="tab-3"),
-                        dbc.Tab(tab4Content, label="4. Mesh", tab_id="tab-4"),
-                        dbc.Tab(tab5Content, label="5. Initial flow simulation", tab_id="tab-5"),
+                        dbc.Tab(tab1Content, label="1. Shape detection", tab_id="tab-1"),
+                        dbc.Tab(tab2Content, label="2. Surface geometry", tab_id="tab-2"),
+                        dbc.Tab(tab3Content, label="3. Mesh", tab_id="tab-3"),
+                        dbc.Tab(tab4Content, label="4. Initial flow simulation", tab_id="tab-4"),
                     ],
                     id="tabs",
                     active_tab="tab-1",
@@ -160,6 +154,17 @@ app.layout = html.Div([
     Output("collapse_shape_detection", "is_open"),
     [Input("button_shape_detection", "n_clicks")],
     [State("collapse_shape_detection", "is_open")]
+)
+def toggle_shape_collapse(n_clicks, is_open):
+    if n_clicks:
+        return not is_open
+    return is_open
+
+#Callback to expand simulation settings menu.
+@app.callback(
+    Output("collapse_simulation_settings", "is_open"),
+    [Input("button_simulation_settings", "n_clicks")],
+    [State("collapse_simulation_settings", "is_open")]
 )
 def toggle_shape_collapse(n_clicks, is_open):
     if n_clicks:
@@ -244,11 +249,11 @@ def process_images(blur_value, canny_value, image_data):
 
 @app.callback(
     Output('coords_store', 'data'),  
-    Input('button_surface_geometry', 'n_clicks'),
+    Input('button_airfoil_coordinates', 'n_clicks'),
     State('bitwise_image_store', 'data'),
     prevent_initial_call=True
 )
-def generate_surface_geometry(n_clicks, bitwise_image):
+def generate_airfoil_coordinates(n_clicks, bitwise_image):
     if n_clicks is not None:
         # Decode the base64 image data
         _, content_string = bitwise_image.split(',')
@@ -269,12 +274,13 @@ def generate_surface_geometry(n_clicks, bitwise_image):
     Output('rotated_coords_store', 'data'),
     Output('points_plot', 'figure'),
     Input('coords_store', 'data'),
-    Input('rotate_coords_slider', 'value'),
-    Input('button_flip', 'n_clicks'),
+    # Input('rotate_coords_slider', 'value'),
+    Input('button_flip_hor', 'n_clicks'),
+    Input('button_flip_ver', 'n_clicks'),
     State('rotated_coords_store', 'data'),
     prevent_initial_call=True
 )
-def update_rotated_coords(coords, rotate_value, n_clicks, rotated_coords):
+def update_rotated_coords(coords, n_clicks1, n_clicks2, rotated_coords): # rotate_value, n_clicks, rotated_coords):
     ctx = callback_context
 
     if not ctx.triggered:
@@ -282,11 +288,14 @@ def update_rotated_coords(coords, rotate_value, n_clicks, rotated_coords):
 
     triggered_id = ctx.triggered[0]['prop_id']
 
-    if 'coords_store' in triggered_id or 'rotate_coords_slider' in triggered_id:
-        rotated_coords = shape_detection.rotate_points(rotate_value, coords)
-    elif 'button_flip' in triggered_id:
-        if n_clicks is not None:
-            rotated_coords = shape_detection.flip_coords(rotated_coords)
+    if 'coords_store' in triggered_id:# or 'rotate_coords_slider' in triggered_id:
+        rotated_coords = shape_detection.rotate_points(0, coords)
+    elif 'button_flip_hor' in triggered_id:
+        if n_clicks1 is not None:
+            rotated_coords = shape_detection.flip_coords_hor(rotated_coords)
+    elif 'button_flip_ver' in triggered_id:
+        if n_clicks2 is not None:
+            rotated_coords = shape_detection.flip_coords_ver(rotated_coords)
     
     rotated_point_plot_data = {
         'x': rotated_coords[:, 0],
@@ -411,7 +420,7 @@ def generate_array(minimum, maximum, interval):
     return str(array_string), {'data_key': 'data_value'}
 
 
-# Check if allrun is a running process
+# Check if process is a running
 def is_simulation_running(*process_names):
     for proc in psutil.process_iter(['pid', 'name']):
         if any(name in proc.info['name'] for name in process_names):
@@ -431,7 +440,7 @@ def run_loop(n_clicks, array_string, rotated_coords_data):
     # Parse the string array into a list of integers
     array_list = ast.literal_eval(array_string)
 
-    # Delete simulation folder if already exists.
+    # Delete simulation folder if it already exists.
     if os.path.exists("simulation"):
         shutil.rmtree("simulation")
 
@@ -462,6 +471,45 @@ def run_loop(n_clicks, array_string, rotated_coords_data):
 
     return n_clicks
 
+# Paraview run picture scripts (Meshx.py, Px.py Ux.py)
+@app.callback(
+    [Output(f'resultImage_{i}', 'src') for i in range(1, 3)],
+    # Output('status_interval', 'disabled'),
+    Input('button_paraview', 'n_clicks'),
+)
+def run_script(n_clicks):
+    if n_clicks is not None and n_clicks > 0:
+        try:
+            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh1.py'])
+            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh2.py'])
+            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh3.py'])
+            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/P1.py'])
+            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/P2.py'])
+            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/U1.py'])
+            # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/U2.py'])
+                        # Assuming you have an image file named 'your_image.png' in the same directory
+            
+
+            image_files = ['externalFlow.jpg', 'placeholder_image.png']  # Add more image file names as needed
+            encoded_images = []
+
+            for i, image_file in enumerate(image_files):
+                # Read each image file and encode it as base64
+                with open(image_file, 'rb') as file:
+                    encoded_image = base64.b64encode(file.read()).decode('utf-8')
+                    encoded_images.append(f'data:image/png;base64,{encoded_image}')
+
+            # Return the base64-encoded image sources
+            return tuple(encoded_images)  # Return as a tuple
+            # return "Paraview script ran successfully."
+        except Exception as e:
+            return tuple([f"Error executing script: {str(e)}"] * 2)  # Repeat the error message for each image
+    return tuple([""] * 2)  # Empty strings for each image source if no button click
+
+
+
+
+
 # Active status_interval
 @app.callback(
     Output('status_interval', 'disabled'),
@@ -473,34 +521,18 @@ def toggle_interval(n_clicks):
 # Check if OF simulation is still running. 
 @app.callback(
     Output('status_text', 'children'),
+    # Output('status_interval', 'disabled'),
     Input('status_interval', 'n_intervals'),
 )
 def check_simulation_status(n_intervals):
     if n_intervals > 0:
         if is_simulation_running("Allrun", "blockMesh", "snappyHexMesh", "extrudeMesh", "simpleFoam"):
-            return "Running simulations..."
+            return "Running simulations..."#, False
         else:
+            
+            return "All simulations completed."#, True
+    return "Waiting for simulation start..."#, True
 
-            return "All simulations completed."
-    return "Waiting for simulation start..."
-
-# Angle of attack checklist ###not currently in use
-# @app.callback(
-#     Output('output-message', 'children'),
-#     [Input('checklistAOA', 'value')],
-#     prevent_initial_call=True
-# )
-# def save_checklist(checkbox_values):
-#     if checkbox_values:
-#         #Save the checklist as a text file
-#         filename = 'checklist.txt'
-#         file_path = os.path.join(UPLOAD_DIR, filename)
-
-#         #Sort the checklist values in the same order as the options
-#         sorted_values = sorted(checkbox_values, key=lambda x: [option['value'] for option in checklist_options].index(x))
-
-#         with open(file_path, 'w') as f:
-#             f.write('\n'.join(sorted_values))
 
 
 if __name__ == "__main__":
