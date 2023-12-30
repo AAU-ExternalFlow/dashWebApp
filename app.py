@@ -1,21 +1,22 @@
-import os
-import base64
-import time
-import sys
-from dash import Dash, html, dcc, dash_table, callback_context, callback, exceptions, no_update
+# import os
+# import base64
+# import time
+# import sys
+# from dash import Dash, html, dcc, dash_table, callback_context, callback, exceptions, no_update
+from dash import Dash, html, dcc
 from callbacks import get_callbacks
-from dash.dependencies import Input, Output, State
-import plotly.graph_objects as go
-from stl import mesh
+# from dash.dependencies import Input, Output, State
+# import plotly.graph_objects as go
+# from stl import mesh
 import dash_bootstrap_components as dbc
 import pathlib
 import numpy as np
-import cv2
-import ast
-import shutil
-import psutil
-import subprocess
-import _thread
+# import cv2
+# import ast
+# import shutil
+# import psutil
+# import subprocess
+# import _thread
 from app_components import *
 
 

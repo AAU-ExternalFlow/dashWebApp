@@ -1,6 +1,6 @@
 from dash import Dash, html, dcc, dash_table
 import dash_bootstrap_components as dbc
-import base64
+# import base64
 import pathlib
 
 

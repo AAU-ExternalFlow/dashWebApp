@@ -11,7 +11,7 @@ import time
 import shutil
 import psutil
 import ast
-import subprocess
+# import subprocess
 import _thread
 
 
@@ -53,14 +53,14 @@ def get_callbacks(app):
         [Input("button_simulation_settings", "n_clicks")],
         [State("collapse_simulation_settings", "is_open")]
     )
-    def toggle_shape_collapse(n_clicks, is_open):
+    def toggle_simulation_collapse(n_clicks, is_open):
         if n_clicks:
             return not is_open
         return is_open
 
 
 
-    #image upload, can save locally if uncomment the commented section
+    # Store uploaded image.
     @app.callback(
         Output('raw_image_store', 'data'),
         Input('upload-image', 'contents')
@@ -79,7 +79,7 @@ def get_callbacks(app):
             return contents
         return None
 
-    # Show the uploaded image
+    # Show the uploaded image and output so it can be processed.
     @app.callback(
         [Output('raw_image', 'src'),
         Output('blur_image','src'),
@@ -93,7 +93,7 @@ def get_callbacks(app):
     def display_storred_images(raw_image_data, blur_image_data, canny_image_data, bitwise_image_data):
         return raw_image_data, blur_image_data, canny_image_data, bitwise_image_data
 
-
+    # Image processing
     @app.callback(
         [Output('blur_image_store', 'data'),
         Output('canny_image_store', 'data'),
@@ -136,6 +136,7 @@ def get_callbacks(app):
 
         return '', '', '' # Return empty data if image_data is None
 
+    # Generate airfoil coordinates.
     @app.callback(
         Output('coords_store', 'data'),  
         Input('button_airfoil_coordinates', 'n_clicks'),
@@ -158,7 +159,7 @@ def get_callbacks(app):
 
         return coords
 
-
+    # Update airfoil coordinates if any of the rotation buttons are pressed and create plot.
     @app.callback(
         Output('rotated_coords_store', 'data'),
         Output('points_plot', 'figure'),
@@ -177,6 +178,7 @@ def get_callbacks(app):
 
         triggered_id = ctx.triggered[0]['prop_id']
 
+        # If any rotations buttons are pressed perform actions:
         if 'coords_store' in triggered_id:# or 'rotate_coords_slider' in triggered_id:
             rotated_coords = shape_detection.rotate_points(0, coords)
         elif 'button_flip_hor' in triggered_id:
@@ -186,6 +188,7 @@ def get_callbacks(app):
             if n_clicks2 is not None:
                 rotated_coords = shape_detection.flip_coords_ver(rotated_coords)
         
+        # Create airfoil coordinates plot.
         rotated_point_plot_data = {
             'x': rotated_coords[:, 0],
             'y': rotated_coords[:, 1],
@@ -210,7 +213,7 @@ def get_callbacks(app):
 
 
 
-
+    # STL to surface points.
     def stl2mesh3d(stl_mesh):
         p, q, r = stl_mesh.vectors.shape
         vertices, ixr = np.unique(stl_mesh.vectors.reshape(p*q, r), return_inverse=True, axis=0)
@@ -219,7 +222,7 @@ def get_callbacks(app):
         K = np.take(ixr, [3*k+2 for k in range(p)])
         return vertices, I, J, K
 
-
+    # Generate STL file and show interactive 3D surface plot.
     @app.callback(
         Output('stl_graph', 'figure'),
         Input('button_3D', 'n_clicks'),
@@ -229,14 +232,14 @@ def get_callbacks(app):
     def load_stl(n_clicks, rotated_coords):
         if n_clicks is not None:
             STL = generateSTL.generate_STL(rotated_coords)
-            STL.save(os.path.join(os.getcwd(), 'object.stl'))  # Save the mesh to the specified path
+            STL.save(os.path.join(os.getcwd(), 'object.stl'))  # Save the STL to the specified path
             
-        time.sleep(0.7)
-        # Load the STL file (replace 'AT&T-Building.stl' with your actual file)
+        time.sleep(0.7) # Short timer to give the STL time to save correctly.
         my_mesh = mesh.Mesh.from_file('object.stl')
         vertices, I, J, K = stl2mesh3d(my_mesh)
         x, y, z = vertices.T
         
+        #Create 3D surface plot:
         colorscale = [[0, '#787878'], [1, '#787878']]
         
         mesh3D = go.Mesh3d(
@@ -283,7 +286,7 @@ def get_callbacks(app):
         
         return fig
 
-
+    # Generate AOA array dependend on inputs given in dash app.
     @app.callback(
         Output('aoa_array', 'children'),
         Output('aoa_store','data'),
@@ -296,6 +299,7 @@ def get_callbacks(app):
         if minimum is None or maximum is None or interval is None:
             return "Please provide values for all inputs."
 
+        # Round off numbers given.
         minimum = int(round(minimum))
         maximum = int(round(maximum))
         interval = int(round(interval))
@@ -307,13 +311,13 @@ def get_callbacks(app):
         array = np.linspace(minimum, maximum, num_elements, dtype=int)
         array_string = "[" + ", ".join(map(str, array)) + "]"
 
-        # Create options for the dropdown menu in tab 3 and 4
+        # Create options for the dropdown menu in results tab.
         dropdown_options = [{'label': str(val), 'value': str(val)} for val in array]
 
         return str(array_string), {'data_key': 'data_value'}, dropdown_options
 
 
-    # Check if process is a running
+    # Check if any OF process is a running
     def is_simulation_running(*process_names):
         for proc in psutil.process_iter(['pid', 'name']):
             if any(name in proc.info['name'] for name in process_names):
@@ -321,16 +325,14 @@ def get_callbacks(app):
         return False
 
 
-    # Run OF callback
+    # Run OF.
     @app.callback(
         Output('OF_callback_placeholder','data'),
         Input('button_simulation', 'n_clicks'),
         State('aoa_array', 'children'),
         State('rotated_coords_store', 'data'),
     )
-    # def run_loop(n_clicks, array_string, coords):
     def run_loop(n_clicks, array_string, rotated_coords_data):
-
         # Parse the string array into a list of integers
         array_list = ast.literal_eval(array_string)
 
@@ -343,6 +345,7 @@ def get_callbacks(app):
 
             Results.generateSubFolder(folderName)
 
+            # Create STL dependend on given AOAs.
             aoaCoords = shape_detection.rotate_points(interval, rotated_coords_data)
             aoaSTL = generateSTL.generate_STL(aoaCoords)
 
@@ -365,25 +368,24 @@ def get_callbacks(app):
 
         return n_clicks
 
-    # # Paraview run picture scripts (Meshx.py, Px.py Ux.py)
+    # Paraview run picture scripts (Meshx.py, Px.py Ux.py)
     @app.callback(
-        Output('paraview_callback_placeholder','data'), #placeholder output
-        # Output('status_interval', 'disabled'),
+        Output('paraview_callback_placeholder','data'),
         Input('button_paraview', 'n_clicks'),
-        # State('aoa_store', 'data')
         State('aoa_array', 'children')
     )
-    def run_script(n_clicks, aoa_array):
-        print(f"n_clicks: {n_clicks}")
-        print(f"aoa_array: {aoa_array}")
+    def run_paraview(n_clicks, aoa_array):
+        # print(f"n_clicks: {n_clicks}")
+        # print(f"aoa_array: {aoa_array}")
         if n_clicks is not None:
             # Split the string representation of the array and convert to integers
             aoa_array = [int(value) for value in aoa_array[1:-1].split(', ')]
-            print(aoa_array)
+            # print(aoa_array)
             # Create directories based on aoa_array values
             for aoa_value in aoa_array:
                 directory_name = f"assets/{aoa_value}"
                 os.makedirs(directory_name, exist_ok=True)  # Create directory if it doesn't exist
+
             Results.paraviewResults(aoa_array)
         return n_clicks
             # return [""] * 2  # Placeholder values for the image sources
@@ -395,7 +397,7 @@ def get_callbacks(app):
 
 
 
-    # Active status_interval
+    # Active status_interval when simulation button is pressed.
     @app.callback(
         Output('status_interval', 'disabled'),
         # [Output(f'resultImage_{i}', 'src') for i in range(1, 3)],
@@ -405,7 +407,7 @@ def get_callbacks(app):
         return n_clicks is None
     
 
-    # Check if OF simulation is still running. 
+    # Check if OF simulation is still running, every status_interval period.
     @app.callback(
         Output('status_text', 'children'),
         # Output('status_interval', 'disabled'),
@@ -471,6 +473,7 @@ def get_callbacks(app):
     #         print(image_paths[2])
     #         return image_paths  
 
+    # Generate images of mesh, velocity and pressure fields.
     @app.callback(
         [Output(f'resultImage_{i}', 'src') for i in range(1, 9)],
         Input('refresh_results', 'n_clicks'),
@@ -478,6 +481,7 @@ def get_callbacks(app):
     )
     def update_output(n_clicks, value):
         if n_clicks is not None:
+
             image_paths = [
                 f'/externalflow/assets/{value}/mesh1.png',
                 f'/externalflow/assets/{value}/mesh2.png',
