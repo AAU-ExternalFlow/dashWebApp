@@ -1,64 +1,16 @@
-# import os
-# import base64
-# import time
-# import sys
-# from dash import Dash, html, dcc, dash_table, callback_context, callback, exceptions, no_update
 from dash import Dash, html, dcc
 from callbacks import get_callbacks
-# from dash.dependencies import Input, Output, State
-# import plotly.graph_objects as go
-# from stl import mesh
 import dash_bootstrap_components as dbc
 import pathlib
-import numpy as np
-# import cv2
-# import ast
-# import shutil
-# import psutil
-# import subprocess
-# import _thread
 from app_components import *
-
-
-
-# # Get the absolute path of the current directory
-# current_directory = os.path.dirname(os.path.abspath(__file__))
-
-# # Append paths of other directories to sys.path
-# main_directory_path = os.path.join(current_directory, '..')  # Parent directory
-# imageProcessing_path = os.path.join(current_directory, '..', 'imageProcessing')
-# # third_directory_path = os.path.join(current_directory, '..', 'third_directory')
-
-# sys.path.append(main_directory_path)
-# sys.path.append(imageProcessing_path)
-# # sys.path.append(third_directory_path)
-
-# import shape_detection
-# # from third_script import your_function as third_function
-
 
 
 CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
 UPLOAD_DIR = CURRENT_DIR.parents[0] / 'uploads'
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-# checklist_options = [
-#     {'label': '0degrees', 'value': '0d'},
-#     {'label': '5degrees', 'value': '5d'},
-#     {'label': '10degrees', 'value': '10d'}
-# ]
-
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = Dash(__name__)
-
-# image_path = CURRENT_DIR / 'externalFlow.jpg'
-
-# # Using base64 encoding and decoding
-# def b64_image(image_filename):
-#     with open(image_filename, 'rb') as f:
-#         image = f.read()
-#     return 'data:image/png;base64,' + base64.b64encode(image).decode('utf-8')
-
 
 server = app.server
 app.layout = html.Div([
@@ -73,7 +25,6 @@ app.layout = html.Div([
     dcc.Store(id='aoa_store'),
     dcc.Store(id='OF_callback_placeholder'),
     dcc.Store(id='paraview_callback_placeholder'),
-    # dcc.Store(id='test_store3'),
 
     # dcc.interval used to detect whether simulation is finished.
     dcc.Interval(
@@ -81,7 +32,7 @@ app.layout = html.Div([
             interval=5*1000, # in milliseconds
             n_intervals=0,
             disabled=True
-        ),  # Check OF simulation status interval 
+        ), 
 
     # The layout is made using a row and coloumn technique. 
     # Total coloumn width is 12. Tabs A-C have a width of 4 and tab 1-3 have a width of 8.

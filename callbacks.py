@@ -1,4 +1,4 @@
-from dash import dash, html, dcc, dash_table, callback_context, callback, exceptions, no_update
+from dash import dash, callback_context, callback, exceptions
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 from stl import mesh
@@ -11,7 +11,6 @@ import time
 import shutil
 import psutil
 import ast
-# import subprocess
 import _thread
 
 
@@ -21,16 +20,13 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 # Append paths of other directories to sys.path
 main_directory_path = os.path.join(current_directory, '..')  # Parent directory
 imageProcessing_path = os.path.join(current_directory, '..', 'imageProcessing')
-# third_directory_path = os.path.join(current_directory, '..', 'third_directory')
 
 sys.path.append(main_directory_path)
 sys.path.append(imageProcessing_path)
-# sys.path.append(third_directory_path)
 
 import shape_detection
 import Results
 import generateSTL
-# from third_script import your_function as third_function
 
 
 def get_callbacks(app): 
@@ -59,7 +55,6 @@ def get_callbacks(app):
         return is_open
 
 
-
     # Store uploaded image.
     @app.callback(
         Output('raw_image_store', 'data'),
@@ -67,17 +62,9 @@ def get_callbacks(app):
     )
     def upload_image(contents):
         if contents is not None:
-            # # Decode the contents of the uploaded file
-            # _, content_string = contents.split(',')
-            # decoded = base64.b64decode(content_string)
-
-            # # Save the image to a file within the container's file system
-            # image_filename = 'raw_image.jpg'
-            # image_path = os.path.join(UPLOAD_DIR, image_filename)
-            # with open(image_path, 'wb') as f:
-            #     f.write(decoded)
             return contents
         return None
+
 
     # Show the uploaded image and output so it can be processed.
     @app.callback(
@@ -92,6 +79,7 @@ def get_callbacks(app):
     )
     def display_storred_images(raw_image_data, blur_image_data, canny_image_data, bitwise_image_data):
         return raw_image_data, blur_image_data, canny_image_data, bitwise_image_data
+
 
     # Image processing
     @app.callback(
@@ -136,6 +124,7 @@ def get_callbacks(app):
 
         return '', '', '' # Return empty data if image_data is None
 
+
     # Generate airfoil coordinates.
     @app.callback(
         Output('coords_store', 'data'),  
@@ -154,23 +143,20 @@ def get_callbacks(app):
             decoded_bitwise_image = cv2.imdecode(np_image, cv2.IMREAD_GRAYSCALE)
 
             coords = shape_detection.get_points(decoded_bitwise_image)
-
-            
-
         return coords
+
 
     # Update airfoil coordinates if any of the rotation buttons are pressed and create plot.
     @app.callback(
         Output('rotated_coords_store', 'data'),
         Output('points_plot', 'figure'),
         Input('coords_store', 'data'),
-        # Input('rotate_coords_slider', 'value'),
         Input('button_flip_hor', 'n_clicks'),
         Input('button_flip_ver', 'n_clicks'),
         State('rotated_coords_store', 'data'),
         prevent_initial_call=True
     )
-    def update_rotated_coords(coords, n_clicks1, n_clicks2, rotated_coords): # rotate_value, n_clicks, rotated_coords):
+    def update_rotated_coords(coords, n_clicks1, n_clicks2, rotated_coords):
         ctx = callback_context
 
         if not ctx.triggered:
@@ -179,7 +165,7 @@ def get_callbacks(app):
         triggered_id = ctx.triggered[0]['prop_id']
 
         # If any rotations buttons are pressed perform actions:
-        if 'coords_store' in triggered_id:# or 'rotate_coords_slider' in triggered_id:
+        if 'coords_store' in triggered_id:
             rotated_coords = shape_detection.rotate_points(0, coords)
         elif 'button_flip_hor' in triggered_id:
             if n_clicks1 is not None:
@@ -208,9 +194,7 @@ def get_callbacks(app):
             'xaxis_range': [0, 1], 
             'yaxis_range': [0, 1]  
         }
-
         return rotated_coords, {'data': [rotated_point_plot_data], 'layout': layout}
-
 
 
     # STL to surface points.
@@ -282,9 +266,8 @@ def get_callbacks(app):
         ))
         fig.data[0].update(lightposition=dict(x=3000, y=3000, z=10000))
         fig.update_layout(scene_aspectmode='data')
-
-        
         return fig
+
 
     # Generate AOA array dependend on inputs given in dash app.
     @app.callback(
@@ -299,7 +282,7 @@ def get_callbacks(app):
         if minimum is None or maximum is None or interval is None:
             return "Please provide values for all inputs."
 
-        # Round off numbers given.
+        # Round off the input numbers.
         minimum = int(round(minimum))
         maximum = int(round(maximum))
         interval = int(round(interval))
@@ -364,9 +347,8 @@ def get_callbacks(app):
 
             # Run OpenFOAM
             _thread.start_new_thread(os.system, ('bash '+folderName+'/simulation/Allrun',))
-
-
         return n_clicks
+
 
     # Paraview run picture scripts (Meshx.py, Px.py Ux.py)
     @app.callback(
@@ -375,32 +357,22 @@ def get_callbacks(app):
         State('aoa_array', 'children')
     )
     def run_paraview(n_clicks, aoa_array):
-        # print(f"n_clicks: {n_clicks}")
-        # print(f"aoa_array: {aoa_array}")
         if n_clicks is not None:
             # Split the string representation of the array and convert to integers
             aoa_array = [int(value) for value in aoa_array[1:-1].split(', ')]
-            # print(aoa_array)
+
             # Create directories based on aoa_array values
             for aoa_value in aoa_array:
                 directory_name = f"assets/{aoa_value}"
-                os.makedirs(directory_name, exist_ok=True)  # Create directory if it doesn't exist
+                os.makedirs(directory_name, exist_ok=True)  # Create directory if it does not exist
 
             Results.paraviewResults(aoa_array)
         return n_clicks
-            # return [""] * 2  # Placeholder values for the image sources
-        # else:
-            # return [""] * 2  # Placeholder values when button is not clicked
-        # return tuple([""] * 2)  # Empty strings for each image source if no button click
-
-
-
 
 
     # Active status_interval when simulation button is pressed.
     @app.callback(
         Output('status_interval', 'disabled'),
-        # [Output(f'resultImage_{i}', 'src') for i in range(1, 3)],
         Input('button_simulation', 'n_clicks'),
     )
     def toggle_interval(n_clicks):
@@ -410,68 +382,16 @@ def get_callbacks(app):
     # Check if OF simulation is still running, every status_interval period.
     @app.callback(
         Output('status_text', 'children'),
-        # Output('status_interval', 'disabled'),
         Input('status_interval', 'n_intervals'),
     )
     def check_simulation_status(n_intervals):
         if n_intervals > 0:
             if is_simulation_running("Allrun", "blockMesh", "snappyHexMesh", "extrudeMesh", "simpleFoam"):
-                return "Running simulations..."#, False
+                return "Running simulations..."
             else:
-                # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh1.py'])
-                # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh2.py'])
-                # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/Mesh3.py'])
-                # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/P1.py'])
-                # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/P2.py'])
-                # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/U1.py'])
-                # subprocess.run(['D:\\Program Files\\ParaView 5.11.1\\bin\\pvpython.exe', '../imageProcessing/U2.py'])
-                
+                return "All simulations completed."
+        return "Waiting for simulation start..."
 
-                # image_files = ['externalFlow.jpg', 'placeholder_image.png']  # Add more image file names as needed
-                # encoded_images = []
-
-                # for i, image_file in enumerate(image_files):
-                #     # Read each image file and encode it as base64
-                #     with open(image_file, 'rb') as file:
-                #         encoded_image = base64.b64encode(file.read()).decode('utf-8')
-                #         encoded_images.append(f'data:image/png;base64,{encoded_image}')
-
-                # Return the base64-encoded image sources
-                return "All simulations completed."#, tuple(encoded_images)
-        return "Waiting for simulation start..."#, True
-
-    # @callback(
-    #     [Output(f'resultImage_{i}', 'src') for i in range(1, 8)],
-    #     Input('results_dropdown', 'value')
-    # )
-    # def update_output(value):
-        
-    #     return f'You have selected {value}'
-
-    # @app.callback(
-    #     [Output(f'resultImage_{i}', 'src') for i in range(1, 8)],
-    #     # Output('test_store3','data'),
-    #     Input('refresh_results', 'n_clicks'),
-    #     State('results_dropdown', 'value')
-    # )
-    # def update_output(n_clicks, value):
-    #     if n_clicks is not None:
-    #         print(1)
-    #         value = str(value)
-    #         print(value)
-    #         image_paths = [
-    #                 f'/externalflow/assets/{value}/mesh1.png',
-    #                 f'/externalflow/assets/{value}/mesh2.png',
-    #                 f'/externalflow/assets/{value}/mesh3.png',
-    #                 f'/externalflow/assets/{value}/U1.png',
-    #                 f'/externalflow/assets/{value}/U2.png',
-    #                 f'/externalflow/assets/{value}/P1.png',
-    #                 f'/externalflow/assets/{value}/P2.png',
-    #             ]
-    #         print(image_paths[0])
-    #         print(image_paths[1])
-    #         print(image_paths[2])
-    #         return image_paths  
 
     # Generate images of mesh, velocity and pressure fields.
     @app.callback(
