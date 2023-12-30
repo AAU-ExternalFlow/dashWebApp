@@ -59,9 +59,9 @@ app = Dash(__name__)
 #     return 'data:image/png;base64,' + base64.b64encode(image).decode('utf-8')
 
 
-
 server = app.server
 app.layout = html.Div([
+    # dcc.store used to store data from images or other data to be used later on. 
     dcc.Store(id='raw_image_store'),  
     dcc.Store(id='blur_image_store'),  
     dcc.Store(id='canny_image_store'),  
@@ -73,6 +73,8 @@ app.layout = html.Div([
     dcc.Store(id='OF_callback_placeholder'),
     dcc.Store(id='paraview_callback_placeholder'),
     # dcc.Store(id='test_store3'),
+
+    # dcc.interval used to detect whether simulation is finished.
     dcc.Interval(
             id='status_interval',
             interval=5*1000, # in milliseconds
@@ -80,6 +82,8 @@ app.layout = html.Div([
             disabled=True
         ),  # Check OF simulation status interval 
 
+    # The layout is made using a row and coloumn technique. 
+    # Total coloumn width is 12. Tabs A-C have a width of 4 and tab 1-3 have a width of 8.
     dbc.Card(
         dbc.CardBody([
             dbc.Row([
@@ -93,6 +97,8 @@ app.layout = html.Div([
 
             html.Hr(),
 
+            # From here tab A-C are used to create the left hand side options and buttons.
+            # Generate / run buttons are directly implemented in this code, whereas the tab contents are created in app_components.py.
             dbc.Row([
                 dbc.Col([
                     dbc.Card([
@@ -124,8 +130,6 @@ app.layout = html.Div([
                                 ]),
                             ),
 
-
-
                         html.Hr(),
 
                         dbc.Button("2. Generate surface geometry", id="button_3D"),
@@ -150,6 +154,7 @@ app.layout = html.Div([
                     html.Div(id='hidden-output', style={'display': 'none'}),
                 ], width=4),
 
+                # From here the right hand side tabs are built. These are tabs 1-3.
                 dbc.Col([
                     dbc.Tabs([
                         dbc.Tab(tab1Content, label="1. Shape detection", tab_id="tab-1"),
@@ -166,6 +171,7 @@ app.layout = html.Div([
 ])
 
 
+# All dash callbacks are called. 
 get_callbacks(app)
 
 

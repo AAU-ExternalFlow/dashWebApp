@@ -6,16 +6,16 @@ import pathlib
 
 CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
 
-image_path1 = CURRENT_DIR / 'externalFlow.jpg'
-image_path2 = CURRENT_DIR / 'placeholder_image.png'
-image_path3 = CURRENT_DIR / 'externalFlow.jpg'
-image_path4 = CURRENT_DIR / 'externalFlow.jpg'
+# image_path1 = CURRENT_DIR / 'externalFlow.jpg'
+# image_path2 = CURRENT_DIR / 'placeholder_image.png'
+# image_path3 = CURRENT_DIR / 'externalFlow.jpg'
+# image_path4 = CURRENT_DIR / 'externalFlow.jpg'
 
-# Using base64 encoding and decoding
-def b64_image(image_filename):
-    with open(image_filename, 'rb') as f:
-        image = f.read()
-    return 'data:image/png;base64,' + base64.b64encode(image).decode('utf-8')
+# # Using base64 encoding and decoding
+# def b64_image(image_filename):
+#     with open(image_filename, 'rb') as f:
+#         image = f.read()
+#     return 'data:image/png;base64,' + base64.b64encode(image).decode('utf-8')
 
 
 tabAContent = [
@@ -133,7 +133,6 @@ tab2Content = dbc.Card(
     )
 )
 
-
 tab3Content = dbc.Card(
     dbc.CardBody([
         # dbc.Button("Mesh", id="button_mesh_collapse"),
@@ -161,7 +160,7 @@ tab3Content = dbc.Card(
                                 html.Img(id="resultImage_2",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                                 # html.Br({'margin-top': '0'}),
                                 dcc.Markdown('''Mesh at the airfoil trailing edge'''),
-                                # html.Img(id="resultImage_4",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
+                                html.Img(id="resultImage_4",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                             ], width=6),
                         ]),
                     )
@@ -176,10 +175,10 @@ tab3Content = dbc.Card(
                         dbc.Row([
                             dbc.Col([
                                 dcc.Markdown('''Air velocity around the airfoil.'''),
-                                html.Img(id="resultImage_4",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
+                                html.Img(id="resultImage_5",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                                 # html.Br(),
                                 dcc.Markdown('''Air velocity at the airfoil leading edge'''),
-                                html.Img(id="resultImage_5",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto'},className="mx-auto d-block"),
+                                html.Img(id="resultImage_6",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto'},className="mx-auto d-block"),
                                 
                                 
                             ], width=6),
@@ -188,10 +187,10 @@ tab3Content = dbc.Card(
 
                             dbc.Col([
                                 dcc.Markdown('''Pressure around the airfoil.'''),
-                                html.Img(id="resultImage_6",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
+                                html.Img(id="resultImage_7",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                                 # html.Br({'margin-top': '0'}),
                                 dcc.Markdown('''Pressure at the airfoil leading edge'''),
-                                html.Img(id="resultImage_7",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
+                                html.Img(id="resultImage_8",style={'max-width': '100%', 'max-height': '275px', 'width': 'auto', 'height': 'auto','marginBottom':'20px'},className="mx-auto d-block"),
                             ], width=6),
                         ]),
                     )

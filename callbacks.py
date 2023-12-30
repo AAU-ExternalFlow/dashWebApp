@@ -28,10 +28,13 @@ sys.path.append(imageProcessing_path)
 # sys.path.append(third_directory_path)
 
 import shape_detection
+import Results
+import generateSTL
 # from third_script import your_function as third_function
 
 
-def get_callbacks(app):
+def get_callbacks(app): 
+
     #Callback to expand shape detection menu.
     @app.callback(
         Output("collapse_shape_detection", "is_open"),
@@ -225,7 +228,7 @@ def get_callbacks(app):
     )
     def load_stl(n_clicks, rotated_coords):
         if n_clicks is not None:
-            STL = shape_detection.generate_STL(rotated_coords)
+            STL = generateSTL.generate_STL(rotated_coords)
             STL.save(os.path.join(os.getcwd(), 'object.stl'))  # Save the mesh to the specified path
             
         time.sleep(0.7)
@@ -303,7 +306,6 @@ def get_callbacks(app):
         num_elements = (maximum - minimum) // interval + 1
         array = np.linspace(minimum, maximum, num_elements, dtype=int)
         array_string = "[" + ", ".join(map(str, array)) + "]"
-        # return str(array)
 
         # Create options for the dropdown menu in tab 3 and 4
         dropdown_options = [{'label': str(val), 'value': str(val)} for val in array]
@@ -339,10 +341,10 @@ def get_callbacks(app):
         for interval in array_list:
             folderName = os.path.join("simulation", str(interval)).replace("\\","/")
 
-            shape_detection.generateSubFolder(folderName)
+            Results.generateSubFolder(folderName)
 
             aoaCoords = shape_detection.rotate_points(interval, rotated_coords_data)
-            aoaSTL = shape_detection.generate_STL(aoaCoords)
+            aoaSTL = generateSTL.generate_STL(aoaCoords)
 
             # Save rotated aoa coordinates
             np.savetxt(f"{folderName}/coordinates.xy", aoaCoords)
@@ -382,7 +384,7 @@ def get_callbacks(app):
             for aoa_value in aoa_array:
                 directory_name = f"assets/{aoa_value}"
                 os.makedirs(directory_name, exist_ok=True)  # Create directory if it doesn't exist
-            shape_detection.paraviewResults(aoa_array)
+            Results.paraviewResults(aoa_array)
         return n_clicks
             # return [""] * 2  # Placeholder values for the image sources
         # else:
@@ -401,6 +403,7 @@ def get_callbacks(app):
     )
     def toggle_interval(n_clicks):
         return n_clicks is None
+    
 
     # Check if OF simulation is still running. 
     @app.callback(
@@ -469,7 +472,7 @@ def get_callbacks(app):
     #         return image_paths  
 
     @app.callback(
-        [Output(f'resultImage_{i}', 'src') for i in range(1, 8)],
+        [Output(f'resultImage_{i}', 'src') for i in range(1, 9)],
         Input('refresh_results', 'n_clicks'),
         State('results_dropdown', 'value')
     )
@@ -479,6 +482,7 @@ def get_callbacks(app):
                 f'/externalflow/assets/{value}/mesh1.png',
                 f'/externalflow/assets/{value}/mesh2.png',
                 f'/externalflow/assets/{value}/mesh3.png',
+                f'/externalflow/assets/{value}/mesh4.png',
                 f'/externalflow/assets/{value}/U1.png',
                 f'/externalflow/assets/{value}/U2.png',
                 f'/externalflow/assets/{value}/P1.png',
@@ -497,5 +501,5 @@ def get_callbacks(app):
             return encoded_images
         else:
             # If the button hasn't been clicked yet
-            return [dash.no_update] * 7
+            return [dash.no_update] * 8
         
